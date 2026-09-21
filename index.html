@@ -2,2006 +2,873 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>🍔 مطعمي - لعبة الطبخ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🍔 مطعمي</title>
 
 <style>
 *{box-sizing:border-box}
 html,body{
- margin:0;width:100%;height:100%;overflow:hidden;
- font-family:Arial,Tahoma,sans-serif;
- background:#111;color:#fff;user-select:none;
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:Arial,Tahoma,sans-serif;
+  background:#151515;
 }
 button{
- border:0;border-radius:13px;padding:10px 14px;
- font-size:15px;font-weight:bold;cursor:pointer;
+  border:0;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
 }
-button:active{transform:scale(.95)}
-
 #game{
- width:100%;height:100%;
- background:#263238;
- display:flex;flex-direction:column;
- overflow:hidden;
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#202020;
 }
 
-.top{
- flex:0 0 58px;background:#111;
- display:flex;align-items:center;justify-content:space-around;
- gap:4px;z-index:50;
+/* ================= شاشة الغلاف ================= */
+#cover{
+  position:absolute;
+  inset:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 50% 35%,#ffd76b,#d87918 42%,#7a260d 100%);
 }
-.stat{
- background:#292929;border-radius:10px;
- padding:3px 6px;text-align:center;
- font-size:10px;min-width:62px;
+.coverBox{
+  width:min(92%,430px);
+  text-align:center;
+  color:white;
+  padding:28px 20px;
+  border-radius:30px;
+  background:rgba(60,20,5,.55);
+  box-shadow:0 20px 60px #0009;
 }
-.stat b{
- display:block;color:#ffd54f;font-size:16px;
+.bigBurger{
+  font-size:110px;
+  filter:drop-shadow(0 12px 8px #0008);
+  animation:bob 1.5s infinite ease-in-out;
 }
-
-#title{
- flex:0 0 auto;text-align:center;
- background:#7b1fa2;margin:0;padding:5px;
- font-size:20px;
+@keyframes bob{
+  50%{transform:translateY(-10px) rotate(-2deg)}
 }
-
-#orders{
- flex:0 0 90px;
- display:flex;gap:8px;
- overflow-x:auto;
- padding:6px;background:#37474f;
+.coverBox h1{
+  font-size:42px;
+  margin:5px 0;
 }
-#orders::-webkit-scrollbar{display:none}
-
-.order{
- min-width:135px;height:77px;
- background:#fff;color:#222;
- border:4px solid #4caf50;
- border-radius:13px;
- padding:4px;text-align:center;
- cursor:pointer;
+.coverBox p{
+  font-size:18px;
+  margin:8px 0 22px;
 }
-.order.selected{border-color:#ff9800;box-shadow:0 0 12px #ff9800}
-.order.angry{border-color:#f44336}
-.order h3{margin:1px;font-size:12px}
-.customer{font-size:24px}
-.timer{
- height:5px;background:#ddd;
- border-radius:5px;margin-top:3px;
- overflow:hidden;
-}
-.timer i{
- display:block;height:100%;
- background:#4caf50;
-}
-
-#view{
- flex:1;
- min-height:0;
- overflow:hidden;
- position:relative;
- background:#181818;
- touch-action:none;
-}
-
-#world{
- position:absolute;
- width:1200px;height:650px;
- left:50%;top:50%;
- transform:translate(-50%,-50%) scale(1);
- transform-origin:center;
- background:
- linear-gradient(#795548 0 16%,#4e342e 16% 100%);
- border:7px solid #3e2723;
- border-radius:22px;
- overflow:hidden;
-}
-
-.wall{
- position:absolute;top:0;left:0;right:0;height:70px;
- background:#5d4037;
- border-bottom:6px solid #3e2723;
-}
-
-.window{
- position:absolute;top:90px;left:45px;
- width:150px;height:100px;
- background:#81d4fa;
- border:9px solid #4e342e;
-}
-.window:before{
- content:"";
- position:absolute;left:50%;top:0;bottom:0;
- border-left:6px solid #4e342e;
-}
-.window:after{
- content:"";
- position:absolute;left:0;right:0;top:50%;
- border-top:6px solid #4e342e;
-}
-
-.sign{
- position:absolute;top:85px;left:300px;
- background:#ffca28;color:#222;
- padding:13px 30px;
- border-radius:12px;
- font-size:24px;font-weight:bold;
-}
-
-.counter{
- position:absolute;
- left:120px;right:120px;bottom:65px;
- height:115px;
- background:#6d4c41;
- border:8px solid #3e2723;
- border-radius:22px;
-}
-.counter:before{
- content:"";
- position:absolute;
- left:-8px;right:-8px;top:-22px;
- height:30px;
- background:#a1887f;
- border:7px solid #3e2723;
- border-radius:15px;
-}
-
-.station{
- position:absolute;
- width:130px;height:95px;
- background:#263238;
- border:6px solid #111;
- border-radius:17px;
- text-align:center;
- padding:7px;
- font-size:38px;
- z-index:5;
- box-shadow:0 5px 12px #0008;
-}
-.station small{
- display:block;
- font-size:13px;
-}
-#grill{right:100px;bottom:78px}
-#fryer{right:250px;bottom:78px}
-#drink{right:400px;bottom:78px}
-#cash{left:100px;bottom:78px}
-
-.table{
- position:absolute;
- width:120px;height:70px;
- background:#8d6e63;
- border:7px solid #3e2723;
- border-radius:20px;
- text-align:center;
- padding-top:17px;
- font-size:26px;
-}
-
-#table1{left:250px;top:250px}
-#table2{left:430px;top:250px}
-#table3{left:610px;top:250px}
-#table4{left:790px;top:250px}
-#table5{left:330px;top:155px}
-#table6{left:500px;top:155px}
-#table7{left:670px;top:155px}
-#table8{left:840px;top:155px}
-
-.person{
- position:absolute;
- width:80px;
- text-align:center;
- font-size:47px;
- z-index:15;
- transition:left .7s linear,top .7s linear,transform .25s;
-}
-.person small{
- display:block;
- background:#000b;
- border-radius:8px;
- font-size:11px;
- padding:2px;
-}
-.chef{z-index:20}
-
-.dish{
- position:absolute;
- display:none;
- font-size:36px;
- z-index:30;
- transition:left .8s linear,top .8s linear;
-}
-
-#controls{
- flex:0 0 auto;
- background:#263238;
- padding:6px;
-}
-
-.actions{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:6px;
-}
-.action{
- background:#455a64;
- color:#fff;
- min-height:55px;
- font-size:13px;
-}
-.action span{
- display:block;
- font-size:24px;
-}
-
-.tools{
- display:grid;
- grid-template-columns:repeat(5,1fr);
- gap:5px;
- margin-top:6px;
-}
-.tools button{
- background:#ffca28;
- color:#222;
- font-size:11px;
- padding:8px 3px;
-}
-
-#status{
- background:#212121;
- padding:5px 8px;
- text-align:center;
- font-size:12px;
-}
-
-#message{
- position:fixed;
- bottom:125px;
- left:50%;
- transform:translateX(-50%);
- background:#000e;
- padding:10px 18px;
- border-radius:25px;
- z-index:300;
- display:none;
- white-space:nowrap;
-}
-
-.modal{
- position:fixed;
- inset:0;
- background:#000d;
- z-index:250;
- display:none;
- align-items:center;
- justify-content:center;
- padding:15px;
-}
-
-.box{
- background:#263238;
- border:4px solid #ffca28;
- border-radius:22px;
- padding:18px;
- width:100%;
- max-width:460px;
- text-align:center;
-}
-
-.box h1{margin:4px;font-size:34px}
-
 .start{
- width:100%;
- background:#ffca28;
- color:#222;
- font-size:21px;
- margin-top:10px;
+  width:90%;
+  padding:16px;
+  border-radius:18px;
+  font-size:23px;
+  font-weight:bold;
+  background:#ffcc32;
+  color:#4b2305;
+  box-shadow:0 6px 0 #a65d08;
 }
 
-.shoprow{
- background:#37474f;
- padding:10px;
- margin:7px 0;
- border-radius:12px;
- display:flex;
- justify-content:space-between;
- align-items:center;
+/* ================= واجهة اللعبة ================= */
+#hud{
+  position:absolute;
+  top:0;
+  right:0;
+  left:0;
+  z-index:20;
+  min-height:58px;
+  padding:7px;
+  display:flex;
+  gap:7px;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  background:#32190ddd;
+  color:white;
+}
+.info{
+  background:#ffffff18;
+  border:1px solid #ffffff33;
+  padding:7px 10px;
+  border-radius:12px;
+  font-size:14px;
+}
+.hudBtn{
+  min-width:44px;
+  min-height:42px;
+  border-radius:12px;
+  background:#ffcc32;
+  font-size:20px;
 }
 
-.shoprow button{
- background:#ffca28;
- font-size:12px;
+/* ================= العالم ================= */
+#viewport{
+  position:absolute;
+  top:58px;
+  bottom:0;
+  left:0;
+  right:0;
+  overflow:hidden;
+  touch-action:none;
+}
+#world{
+  position:absolute;
+  width:1800px;
+  height:1000px;
+  left:0;
+  top:0;
+  transform:translate(0,0);
+  background:#d6b98b;
 }
 
-.close{
- width:100%;
- background:#ef5350;
- color:#fff;
- margin-top:8px;
+/* الأرض */
+.floor{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+    #d8bc91;
+  background-size:70px 70px;
+}
+.wallTop{
+  position:absolute;
+  left:0;
+  top:0;
+  width:1800px;
+  height:95px;
+  background:#9b5531;
+}
+.street{
+  position:absolute;
+  left:0;
+  top:810px;
+  width:1800px;
+  height:190px;
+  background:#555;
+}
+.streetLine{
+  position:absolute;
+  left:0;
+  right:0;
+  top:895px;
+  height:12px;
+  background:#e8c642;
 }
 
-#hint{
- position:absolute;
- right:10px;
- top:10px;
- background:#0009;
- padding:7px 10px;
- border-radius:12px;
- font-size:11px;
- z-index:40;
+/* ================= المناطق ================= */
+.area{
+  position:absolute;
+  border:6px solid #704020;
+  border-radius:25px;
+  background:#f4dfb8;
+  box-shadow:0 10px 25px #0003;
+}
+.areaTitle{
+  position:absolute;
+  top:12px;
+  right:15px;
+  padding:8px 13px;
+  border-radius:12px;
+  background:#4b2412;
+  color:white;
+  font-size:22px;
+  font-weight:bold;
 }
 
-@media(max-width:700px){
- #world{
+/* المطبخ */
+#kitchen{
+  left:50px;
+  top:125px;
+  width:600px;
+  height:430px;
+}
+.stove{
+  position:absolute;
+  left:55px;
+  top:120px;
+  width:180px;
+  height:115px;
+  border-radius:15px;
+  background:#444;
+  border:7px solid #222;
+}
+.fire{
+  position:absolute;
+  font-size:48px;
+  left:62px;
+  top:20px;
+  animation:fire 0.45s infinite alternate;
+}
+@keyframes fire{
+  to{transform:scale(1.15)}
+}
+.counter{
+  position:absolute;
+  right:40px;
+  top:120px;
+  width:330px;
+  height:100px;
+  border-radius:15px;
+  background:#9a5b32;
+  border:6px solid #61331d;
+}
+.plate{
+  position:absolute;
+  right:125px;
+  top:25px;
+  font-size:60px;
+}
+.fridge{
+  position:absolute;
+  left:270px;
+  bottom:30px;
+  font-size:75px;
+}
+
+/* المتجر */
+#store{
+  left:720px;
+  top:125px;
+  width:330px;
+  height:280px;
+}
+.shelf{
+  position:absolute;
+  top:80px;
+  right:30px;
+  left:30px;
+  height:130px;
+  border:8px solid #704020;
+  background:#bd8150;
+  font-size:45px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+}
+.storeBuy{
+  position:absolute;
+  bottom:20px;
+  left:25px;
+  right:25px;
+  padding:12px;
+  border-radius:12px;
+  background:#ffca2c;
+  font-weight:bold;
+  font-size:16px;
+}
+
+/* التطوير */
+#upgrade{
+  left:1120px;
+  top:125px;
+  width:300px;
+  height:280px;
+}
+.upgrades{
+  margin:80px 20px 0;
+  display:grid;
+  gap:10px;
+}
+.upgrades button{
+  padding:11px;
+  border-radius:12px;
+  background:#e6b738;
+  font-weight:bold;
+}
+
+/* الكاشير */
+#cashier{
+  left:1480px;
+  top:125px;
+  width:270px;
+  height:280px;
+}
+.cashDesk{
+  position:absolute;
+  left:30px;
+  right:30px;
+  top:100px;
+  height:100px;
+  background:#77421f;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:65px;
+}
+
+/* ================= الصالة ================= */
+#dining{
+  left:700px;
+  top:450px;
   width:1050px;
-  height:600px;
- }
- .station{
-  width:115px;
-  height:85px;
-  font-size:32px;
- }
- .top .stat{
-  min-width:54px;
- }
+  height:330px;
+  background:#ead1a0;
+}
+.table{
+  position:absolute;
+  width:150px;
+  height:90px;
+  border-radius:50%;
+  background:#8b542d;
+  border:6px solid #60351e;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:35px;
+}
+.t1{left:70px;top:80px}
+.t2{left:300px;top:170px}
+.t3{left:550px;top:80px}
+.t4{left:780px;top:170px}
+
+.customer{
+  position:absolute;
+  font-size:55px;
+  z-index:4;
+  transition:transform .15s linear;
+}
+.c1{left:120px;top:160px}
+.c2{left:350px;top:70px}
+.c3{left:600px;top:160px}
+.c4{left:830px;top:70px}
+
+.orderBubble{
+  position:absolute;
+  top:-42px;
+  right:-10px;
+  background:white;
+  border:3px solid #65361c;
+  padding:5px 9px;
+  border-radius:12px;
+  font-size:15px;
+}
+
+/* ================= اللاعب ================= */
+#player{
+  position:absolute;
+  width:70px;
+  height:80px;
+  z-index:15;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:57px;
+  filter:drop-shadow(0 5px 3px #0005);
+  transition:transform .04s linear;
+}
+#player.carrying:after{
+  content:"🍔";
+  position:absolute;
+  font-size:30px;
+  top:-15px;
+  right:-5px;
+}
+
+/* ================= أزرار الحركة ================= */
+#movePad{
+  position:absolute;
+  z-index:30;
+  left:12px;
+  bottom:12px;
+  width:165px;
+  height:165px;
+}
+.move{
+  position:absolute;
+  width:52px;
+  height:52px;
+  border-radius:15px;
+  background:#4a2716dd;
+  color:white;
+  font-size:25px;
+  border:2px solid #ffffff55;
+}
+.up{left:56px;top:0}
+.down{left:56px;bottom:0}
+.left{left:0;top:56px}
+.right{right:0;top:56px}
+.center{left:56px;top:56px;background:#d28a22}
+
+/* زر التفاعل */
+#action{
+  position:absolute;
+  z-index:30;
+  right:18px;
+  bottom:28px;
+  width:125px;
+  height:58px;
+  border-radius:18px;
+  background:#ffca2c;
+  color:#4b2305;
+  font-size:19px;
+  font-weight:bold;
+}
+
+/* رسالة */
+#message{
+  position:absolute;
+  z-index:40;
+  left:50%;
+  top:75px;
+  transform:translateX(-50%);
+  background:#fff;
+  color:#32190d;
+  padding:10px 16px;
+  border-radius:14px;
+  box-shadow:0 5px 15px #0004;
+  font-weight:bold;
+  opacity:0;
+  transition:.25s;
+  pointer-events:none;
+}
+#message.show{opacity:1}
+
+/* شاشة إيقاف */
+#pauseScreen{
+  position:absolute;
+  inset:0;
+  z-index:45;
+  background:#0009;
+  color:white;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.pauseBox{
+  background:#4b2817;
+  padding:30px;
+  border-radius:25px;
+}
+.pauseBox button{
+  margin-top:15px;
+  padding:13px 30px;
+  border-radius:13px;
+  background:#ffca2c;
+  font-size:18px;
+}
+
+/* موبايل */
+@media(max-width:600px){
+  #hud{font-size:12px}
+  .info{padding:6px 8px}
+  .areaTitle{font-size:18px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- شاشة البداية -->
-<div id="start" class="modal"
- style="display:flex;background:linear-gradient(145deg,#4a148c,#ff6f00)">
- <div class="box">
-  <h1>🍔 مطعمي</h1>
-  <h2>👨‍🍳 مغامرة المطعم</h2>
-  <p>العاملون والزبائن يتحركون تلقائيًا حسب الطلبات.</p>
-  <p>
-   👆 اسحب المطعم بإصبعك للتحرك.<br>
-   🔍 استخدم إصبعين للتكبير والتصغير.
-  </p>
-  <button class="start" onclick="startGame()">ابدأ المطعم ▶️</button>
- </div>
-</div>
-
 <div id="game">
 
- <div class="top">
-  <div class="stat">💰<b id="money">100</b>ج</div>
-  <div class="stat">⭐<b id="stars">0</b></div>
-  <div class="stat">🏆<b id="level">1</b></div>
-  <div class="stat">👥<b id="capacity">4</b></div>
-  <div class="stat">🍽️<b id="served">0</b></div>
-  <div class="stat">⏱️<b id="time">180</b></div>
- </div>
+<!-- الغلاف -->
+<div id="cover">
+  <div class="coverBox">
+    <div class="bigBurger">🍔</div>
+    <h1>مطعمي</h1>
+    <p>ابدأ يومك في مطعم البرجر!</p>
+    <button class="start" id="startBtn">▶ ابدأ اللعبة</button>
+  </div>
+</div>
 
- <h1 id="title">🍔 مطعمي الكبير</h1>
+<!-- المعلومات -->
+<div id="hud">
+  <div class="info">💰 <span id="money">150</span> جنيه</div>
+  <div class="info">⭐ <span id="score">0</span></div>
+  <div class="info">🍔 الطلبات: <span id="served">0</span></div>
+  <div class="info">📍 <span id="location">المطبخ</span></div>
+  <button class="hudBtn" id="pauseBtn">⏸️</button>
+</div>
 
- <div id="orders"></div>
-
- <div id="view">
-
+<div id="viewport">
   <div id="world">
 
-   <div class="wall"></div>
-   <div class="window"></div>
-   <div class="sign">🍔 مطعمي</div>
+    <div class="floor"></div>
+    <div class="wallTop"></div>
 
-   <div class="table" id="table1">🪑🍽️</div>
-   <div class="table" id="table2">🪑🍽️</div>
-   <div class="table" id="table3">🪑🍽️</div>
-   <div class="table" id="table4">🪑🍽️</div>
-   <div class="table" id="table5">🪑🍽️</div>
-   <div class="table" id="table6">🪑🍽️</div>
-   <div class="table" id="table7">🪑🍽️</div>
-   <div class="table" id="table8">🪑🍽️</div>
+    <!-- المطبخ -->
+    <div class="area" id="kitchen">
+      <div class="areaTitle">👨‍🍳 المطبخ</div>
+      <div class="stove">
+        <div class="fire">🔥</div>
+      </div>
+      <div class="counter">
+        <div class="plate">🍔</div>
+      </div>
+      <div class="fridge">🧊</div>
+    </div>
 
-   <div class="station" id="grill">
-    🔥<small>الشواية</small>
-   </div>
+    <!-- المتجر -->
+    <div class="area" id="store">
+      <div class="areaTitle">🛒 المتجر</div>
+      <div class="shelf">🍞 🥩 🧀 🍅</div>
+      <button class="storeBuy" id="buyBtn">شراء مكونات - 20 جنيه</button>
+    </div>
 
-   <div class="station" id="fryer">
-    🍟<small>القلاية</small>
-   </div>
+    <!-- التطوير -->
+    <div class="area" id="upgrade">
+      <div class="areaTitle">⬆️ التطوير</div>
+      <div class="upgrades">
+        <button data-upgrade="المطبخ">🔥 تطوير المطبخ - 50</button>
+        <button data-upgrade="الفرن">♨️ تطوير الفرن - 70</button>
+        <button data-upgrade="الصالة">🪑 تطوير الصالة - 60</button>
+      </div>
+    </div>
 
-   <div class="station" id="drink">
-    🥤<small>المشروبات</small>
-   </div>
+    <!-- الكاشير -->
+    <div class="area" id="cashier">
+      <div class="areaTitle">💵 الكاشير</div>
+      <div class="cashDesk">💰</div>
+    </div>
 
-   <div class="station" id="cash">
-    💰<small>الكاشير</small>
-   </div>
+    <!-- الصالة -->
+    <div class="area" id="dining">
+      <div class="areaTitle">🍽️ صالة الزبائن</div>
 
-   <div class="counter"></div>
+      <div class="table t1">🍽️</div>
+      <div class="table t2">🍽️</div>
+      <div class="table t3">🍽️</div>
+      <div class="table t4">🍽️</div>
 
-   <!-- العاملون -->
-   <div class="person chef"
-        id="chef1"
-        style="left:520px;top:390px">
-    👨‍🍳<small>الطباخ</small>
-   </div>
+      <div class="customer c1">🧑<div class="orderBubble">🍔</div></div>
+      <div class="customer c2">👩<div class="orderBubble">🍔</div></div>
+      <div class="customer c3">🧔<div class="orderBubble">🍔</div></div>
+      <div class="customer c4">👨<div class="orderBubble">🍔</div></div>
+    </div>
 
-   <div class="person chef"
-        id="chef2"
-        style="left:650px;top:390px;display:none">
-    👩‍🍳<small>المساعد</small>
-   </div>
+    <!-- اللاعب -->
+    <div id="player">👨‍🍳</div>
 
-   <!-- الزبائن -->
-   <div class="person" id="c1"
-        style="left:250px;top:335px">
-    👩<small>زبونة</small>
-   </div>
-
-   <div class="person" id="c2"
-        style="left:430px;top:335px">
-    👨<small>زبون</small>
-   </div>
-
-   <div class="person" id="c3"
-        style="left:610px;top:335px">
-    👩‍🦱<small>زبونة</small>
-   </div>
-
-   <div class="person" id="c4"
-        style="left:790px;top:335px">
-    👨‍🦱<small>زبون</small>
-   </div>
-
-   <div class="person" id="c5"
-        style="left:330px;top:100px;display:none">
-    👩<small>زبونة</small>
-   </div>
-
-   <div class="person" id="c6"
-        style="left:500px;top:100px;display:none">
-    👨<small>زبون</small>
-   </div>
-
-   <div class="person" id="c7"
-        style="left:670px;top:100px;display:none">
-    👩‍🦱<small>زبونة</small>
-   </div>
-
-   <div class="person" id="c8"
-        style="left:840px;top:100px;display:none">
-    👨‍🦱<small>زبون</small>
-   </div>
-
-   <div class="dish" id="dish">🍽️</div>
-
+    <div class="street"></div>
+    <div class="streetLine"></div>
   </div>
 
-  <div id="hint">
-   👆 اسحب لتحريك المطعم • 🔍 إصبعان للتكبير
+  <!-- التحكم -->
+  <div id="movePad">
+    <button class="move up" data-dy="-1">⬆️</button>
+    <button class="move down" data-dy="1">⬇️</button>
+    <button class="move left" data-dx="-1">⬅️</button>
+    <button class="move right" data-dx="1">➡️</button>
+    <button class="move center">👨‍🍳</button>
   </div>
 
- </div>
-
- <div id="status">المطعم جاهز.</div>
-
- <div id="controls">
-
-  <div class="actions">
-   <button class="action" onclick="manualCook('burger')">
-    <span>🍔</span>برجر
-   </button>
-
-   <button class="action" onclick="manualCook('fries')">
-    <span>🍟</span>بطاطس
-   </button>
-
-   <button class="action" onclick="manualCook('drink')">
-    <span>🥤</span>مشروب
-   </button>
-  </div>
-
-  <div class="tools">
-   <button onclick="togglePause()" id="pauseBtn">⏸️ إيقاف</button>
-   <button onclick="openShop()">🏪 تطوير</button>
-   <button onclick="toggleSound()" id="soundBtn">🔊 صوت</button>
-   <button onclick="lockGame()" id="lockBtn">🔓 قفل</button>
-   <button onclick="endDay()">🏁 إنهاء</button>
-  </div>
-
- </div>
+  <button id="action">🍔 تفاعل</button>
 </div>
 
 <div id="message"></div>
 
-<!-- المتجر -->
-<div id="shop" class="modal">
- <div class="box">
-
-  <h2>🛠️ تطوير أداء المطعم</h2>
-
-  <div class="shoprow">
-   <span>
-    ⚡ سرعة العاملين<br>
-    <small>تسريع الحركة والخدمة</small>
-   </span>
-   <button onclick="upgrade('speed')">100ج</button>
+<!-- إيقاف -->
+<div id="pauseScreen">
+  <div class="pauseBox">
+    <h2>⏸️ اللعبة متوقفة</h2>
+    <p>اضغط متابعة للرجوع للمطعم</p>
+    <button id="resumeBtn">▶ متابعة</button>
   </div>
-
-  <div class="shoprow">
-   <span>🔥 سرعة الطبخ</span>
-   <button onclick="upgrade('cook')">120ج</button>
-  </div>
-
-  <div class="shoprow">
-   <span>👥 زيادة سعة الزبائن</span>
-   <button onclick="upgrade('capacity')">150ج</button>
-  </div>
-
-  <div class="shoprow">
-   <span>❤️ صبر الزبائن</span>
-   <button onclick="upgrade('patience')">120ج</button>
-  </div>
-
-  <button class="close" onclick="closeShop()">إغلاق</button>
-
- </div>
-</div>
-
-<!-- النهاية -->
-<div id="end" class="modal">
- <div class="box">
-  <h1>🎉 انتهى اليوم!</h1>
-  <div id="result"></div>
-  <button class="start" onclick="location.reload()">
-   يوم جديد 🔄
-  </button>
- </div>
 </div>
 
 <script>
-"use strict";
+(function(){
 
-/* =========================
-   المتغيرات الأساسية
-========================= */
+  const world = document.getElementById("world");
+  const player = document.getElementById("player");
+  const viewport = document.getElementById("viewport");
 
-let started=false;
-let paused=false;
-let locked=false;
-let soundOn=true;
+  const moneyEl = document.getElementById("money");
+  const scoreEl = document.getElementById("score");
+  const servedEl = document.getElementById("served");
+  const locationEl = document.getElementById("location");
+  const message = document.getElementById("message");
 
-let money=100;
-let stars=0;
-let level=1;
-let served=0;
+  const cover = document.getElementById("cover");
+  const pauseScreen = document.getElementById("pauseScreen");
 
-let speedLevel=1;
-let cookLevel=1;
-let capacityLevel=1;
-let patienceLevel=1;
+  let x = 150;
+  let y = 220;
 
-let orders=[];
-let current=null;
-let number=0;
+  let money = 150;
+  let score = 0;
+  let served = 0;
 
-let timer=null;
-let spawnTimer=null;
-let patienceTimer=null;
+  let paused = false;
+  let started = false;
+  let carrying = false;
 
-let time=180;
-let cooking=false;
+  const speed = 7;
 
-let audio=null;
+  function say(text){
+    message.textContent = text;
+    message.classList.add("show");
 
-let view=document.getElementById("view");
-let world=document.getElementById("world");
-
-let dragging=false;
-let pinch=false;
-
-let sx=0;
-let sy=0;
-let wx=0;
-let wy=0;
-let lastDist=0;
-
-let zoom=1;
-
-let busyWorkers={
- chef1:false,
- chef2:false
-};
-
-
-/* =========================
-   اختصار العناصر
-========================= */
-
-function $(id){
- return document.getElementById(id);
-}
-
-
-/* =========================
-   الصوت
-========================= */
-
-function beep(f=500,d=.12){
-
- if(!soundOn)return;
-
- try{
-
-  audio=audio||
-   new(window.AudioContext||window.webkitAudioContext)();
-
-  if(audio.state==="suspended"){
-   audio.resume();
+    clearTimeout(window.msgTimer);
+    window.msgTimer = setTimeout(function(){
+      message.classList.remove("show");
+    },1800);
   }
 
-  let o=audio.createOscillator();
-  let g=audio.createGain();
+  function updatePlayer(){
 
-  o.frequency.value=f;
+    player.style.left = x + "px";
+    player.style.top = y + "px";
 
-  g.gain.setValueAtTime(
-   .001,
-   audio.currentTime
-  );
+    /*
+      نحرك الكاميرا مع اللاعب.
+      العالم أكبر من شاشة الموبايل،
+      وبالتالي تستطيع التجول داخله في كل الاتجاهات.
+    */
 
-  g.gain.exponentialRampToValueAtTime(
-   .13,
-   audio.currentTime+.02
-  );
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
 
-  g.gain.exponentialRampToValueAtTime(
-   .001,
-   audio.currentTime+d
-  );
+    let cameraX = -(x - vw/2);
+    let cameraY = -(y - vh/2);
 
-  o.connect(g);
-  g.connect(audio.destination);
+    const minX = vw - 1800;
+    const minY = vh - 1000;
 
-  o.start();
-  o.stop(audio.currentTime+d+.03);
+    cameraX = Math.max(minX, Math.min(0,cameraX));
+    cameraY = Math.max(minY, Math.min(0,cameraY));
 
- }catch(e){}
-}
+    world.style.transform =
+      "translate(" + cameraX + "px," + cameraY + "px)";
 
-
-/* =========================
-   الرسائل
-========================= */
-
-function msg(t){
-
- let m=$("message");
-
- m.textContent=t;
- m.style.display="block";
-
- clearTimeout(msg.t);
-
- msg.t=setTimeout(()=>{
-  m.style.display="none";
- },1800);
-}
-
-
-/* =========================
-   تحديث البيانات
-========================= */
-
-function ui(){
-
- $("money").textContent=Math.floor(money);
- $("stars").textContent=Math.floor(stars);
- $("level").textContent=level;
- $("served").textContent=served;
- $("capacity").textContent=maxCustomers();
- $("time").textContent=time;
-}
-
-
-/* =========================
-   سعة المطعم
-========================= */
-
-function maxCustomers(){
-
- return Math.min(
-  8,
-  4+(capacityLevel-1)*2+
-  Math.floor((level-1)/2)*2
- );
-}
-
-
-/* =========================
-   قائمة الطعام
-========================= */
-
-function getMenu(){
-
- let r=Math.random();
-
- if(level>=4 && r>.75){
-
-  return{
-   name:"وجبة كاملة",
-   icon:"🍔🍟🥤",
-   price:85,
-   steps:["burger","fries","drink"]
-  };
-
- }
-
- if(r<.42){
-
-  return{
-   name:"برجر",
-   icon:"🍔",
-   price:45,
-   steps:["burger"]
-  };
-
- }
-
- if(r<.72){
-
-  return{
-   name:"بطاطس",
-   icon:"🍟",
-   price:25,
-   steps:["fries"]
-  };
-
- }
-
- return{
-  name:"مشروب",
-  icon:"🥤",
-  price:20,
-  steps:["drink"]
- };
-
-}
-
-
-/* =========================
-   ربح إضافي
-========================= */
-
-function profitBonus(){
-
- return Math.max(
-  0,
-  Math.floor((level-1)/2)
- );
-
-}
-
-
-/* =========================
-   سعر الطلب
-========================= */
-
-function price(o){
-
- return o.item.price+
- (level*3)+
- (profitBonus()*10);
-
-}
-
-
-/* =========================
-   وقت الزبون
-========================= */
-
-function customerTime(){
-
- return 30+
- patienceLevel*7+
- level*2;
-
-}
-
-
-/* =========================
-   بدء اللعبة
-========================= */
-
-function startGame(){
-
- started=true;
- paused=false;
- locked=false;
-
- $("start").style.display="none";
-
- try{
-  audio=audio||
-   new(window.AudioContext||window.webkitAudioContext)();
-
-  audio.resume();
- }catch(e){}
-
- ui();
-
- render();
-
- $("status").textContent=
-  "🍽️ المطعم بدأ! اختر طلبًا من الأعلى.";
-
- clearInterval(timer);
- clearInterval(spawnTimer);
- clearInterval(patienceTimer);
-
- timer=setInterval(gameTimer,1000);
-
- spawnTimer=setInterval(()=>{
-  if(!paused){
-   spawn();
-  }
- },4200);
-
- patienceTimer=setInterval(()=>{
-  if(!paused){
-   decreasePatience();
-  }
- },1000);
-
- setTimeout(()=>{
-  spawn();
- },700);
-
- setTimeout(()=>{
-  spawn();
- },1700);
-
- beep(660,.15);
-
-}
-
-
-/* =========================
-   عداد الوقت
-========================= */
-
-function gameTimer(){
-
- if(!started||paused)return;
-
- time--;
-
- ui();
-
- if(time<=0){
-  endDay();
- }
-
-}
-
-
-/* =========================
-   الطلبات
-========================= */
-
-function spawn(){
-
- if(!started||paused)return;
-
- if(orders.length>=maxCustomers())return;
-
- let item=getMenu();
-
- let o={
-  id:++number,
-  item:item,
-  left:customerTime(),
-  max:customerTime(),
-  step:0,
-  angry:false,
-  slot:getFreeSlot(),
-  customer:[
-   "👩","👨","👩‍🦱","👨‍🦱"
-  ][Math.floor(Math.random()*4)]
- };
-
- if(o.slot<0)return;
-
- orders.push(o);
-
- moveCustomerToTable(o);
-
- render();
-
- $("status").textContent=
-  "🔔 زبون جديد! يريد "+
-  item.icon+" "+item.name;
-
- beep(550,.08);
-
-}
-
-
-/* =========================
-   إيجاد مكان زبون
-========================= */
-
-function getFreeSlot(){
-
- for(let i=0;i<maxCustomers();i++){
-
-  let used=orders.some(o=>o.slot===i);
-
-  if(!used)return i;
-
- }
-
- return -1;
-}
-
-
-/* =========================
-   حركة الزبون إلى الطاولة
-========================= */
-
-function moveCustomerToTable(o){
-
- let c=$("c"+(o.slot+1));
-
- let table=$("table"+(o.slot+1));
-
- if(!c||!table)return;
-
- c.textContent=o.customer;
-
- let small=document.createElement("small");
- small.textContent="زبون";
- c.appendChild(small);
-
- c.style.display="block";
-
- let x=table.offsetLeft+20;
- let y=table.offsetTop-5;
-
- let seconds=Math.max(
-  .5,
-  .9-(speedLevel*.07)
- );
-
- c.style.transition=
-  "left "+seconds+"s linear,top "+seconds+"s linear";
-
- c.style.left=x+"px";
- c.style.top=y+"px";
-
-}
-
-
-/* =========================
-   صبر الزبون
-========================= */
-
-function decreasePatience(){
-
- if(!orders.length)return;
-
- orders.forEach(o=>{
-
-  o.left--;
-
-  if(o.left<=0){
-
-   o.angry=true;
-
-   let c=$("c"+(o.slot+1));
-
-   if(c){
-    c.style.transform="scale(1.15)";
-   }
-
+    updateLocation();
   }
 
-  if(o.left<-8){
+  function updateLocation(){
 
-   removeOrder(o,false);
+    let place = "المطعم";
 
+    if(x < 650 && y < 560){
+      place = "👨‍🍳 المطبخ";
+    }
+
+    if(x >= 650 && x < 1080 && y < 450){
+      place = "🛒 المتجر";
+    }
+
+    if(x >= 1080 && x < 1450 && y < 450){
+      place = "⬆️ التطوير";
+    }
+
+    if(x >= 1450 && y < 450){
+      place = "💵 الكاشير";
+    }
+
+    if(y >= 440 && x >= 650){
+      place = "🍽️ صالة الزبائن";
+    }
+
+    locationEl.textContent = place;
   }
 
- });
+  function move(dx,dy){
 
- render();
+    if(!started || paused) return;
 
-}
+    x += dx * speed;
+    y += dy * speed;
 
+    x = Math.max(10,Math.min(1730,x));
+    y = Math.max(100,Math.min(900,y));
 
-/* =========================
-   عرض الطلبات
-========================= */
-
-function render(){
-
- let box=$("orders");
-
- box.innerHTML="";
-
- if(!orders.length){
-
-  box.innerHTML=
-   '<div style="margin:auto;color:#ddd">'+
-   'لا يوجد طلبات حاليًا 🍽️</div>';
-
-  return;
-
- }
-
- orders.forEach(o=>{
-
-  let d=document.createElement("div");
-
-  d.className=
-   "order"+
-   (o.angry?" angry":"")+
-   (current===o?" selected":"");
-
-  let percent=
-   Math.max(
-    0,
-    Math.min(
-     100,
-     o.left/o.max*100
-    )
-   );
-
-  d.innerHTML=
-   '<div class="customer">'+
-   o.customer+
-   '</div>'+
-   '<h3>طلب #'+o.id+'</h3>'+
-   o.item.icon+" "+o.item.name+
-   '<br>💰 '+price(o)+'ج'+
-   '<div class="timer">'+
-   '<i style="width:'+percent+'%"></i>'+
-   '</div>';
-
-  d.onclick=()=>{
-   selectOrder(o.id);
-  };
-
-  box.appendChild(d);
-
- });
-
-}
-
-
-/* =========================
-   اختيار الطلب
-========================= */
-
-function selectOrder(id){
-
- if(paused){
-  msg("⏸️ المطعم متوقف");
-  return;
- }
-
- if(locked){
-  msg("🔒 افتح القفل أولًا");
-  return;
- }
-
- if(cooking){
-  msg("🔥 العامل مشغول");
-  return;
- }
-
- current=orders.find(o=>o.id===id);
-
- if(!current)return;
-
- $("status").textContent=
-  "👨‍🍳 اختر الطبق المطلوب من الأزرار.";
-
- workerMoveToNextStation();
-
- render();
-
- beep(700,.1);
-
-}
-
-
-/* =========================
-   معرفة المحطة
-========================= */
-
-function stationFor(type){
-
- if(type==="burger"){
-  return $("grill");
- }
-
- if(type==="fries"){
-  return $("fryer");
- }
-
- return $("drink");
-
-}
-
-
-/* =========================
-   العامل المتاح
-========================= */
-
-function getWorker(){
-
- if(!busyWorkers.chef1){
-
-  return $("chef1");
-
- }
-
- if(level>=3){
-
-  $("chef2").style.display="block";
-
-  if(!busyWorkers.chef2){
-
-   return $("chef2");
-
+    updatePlayer();
   }
 
- }
+  /* أزرار الحركة */
+  document.querySelectorAll(".move").forEach(function(btn){
 
- return null;
+    if(btn.classList.contains("center")) return;
 
-}
+    let timer = null;
 
+    function begin(e){
+      e.preventDefault();
 
-/* =========================
-   سرعة العامل
-========================= */
+      const dx = Number(btn.dataset.dx || 0);
+      const dy = Number(btn.dataset.dy || 0);
 
-function workerSpeed(){
+      move(dx,dy);
 
- return 160+
-  (speedLevel-1)*60+
-  (level-1)*25;
+      clearInterval(timer);
+      timer = setInterval(function(){
+        move(dx,dy);
+      },55);
+    }
 
-}
+    function end(){
+      clearInterval(timer);
+      timer = null;
+    }
 
+    btn.addEventListener("pointerdown",begin);
+    btn.addEventListener("pointerup",end);
+    btn.addEventListener("pointercancel",end);
+    btn.addEventListener("pointerleave",end);
+  });
 
-/* =========================
-   حركة العامل
-========================= */
+  /* لوحة المفاتيح */
+  document.addEventListener("keydown",function(e){
 
-function moveElementTo(el,x,y){
+    if(!started || paused) return;
 
- return new Promise(resolve=>{
+    if(e.key === "ArrowLeft") move(-1,0);
+    if(e.key === "ArrowRight") move(1,0);
+    if(e.key === "ArrowUp") move(0,-1);
+    if(e.key === "ArrowDown") move(0,1);
+  });
 
-  let oldX=el.offsetLeft;
-  let oldY=el.offsetTop;
+  /* البداية */
+  document.getElementById("startBtn").addEventListener("click",function(){
 
-  let distance=Math.hypot(
-   x-oldX,
-   y-oldY
-  );
+    started = true;
+    cover.style.display = "none";
 
-  let seconds=Math.max(
-   .35,
-   distance/workerSpeed()
-  );
+    say("🍔 أهلاً بك! تحرك داخل المطعم");
 
-  el.style.transition=
-   "left "+seconds+"s linear,top "+seconds+"s linear";
+    updatePlayer();
+  });
 
-  el.style.left=x+"px";
-  el.style.top=y+"px";
+  /* إيقاف */
+  document.getElementById("pauseBtn").addEventListener("click",function(){
 
-  setTimeout(
-   resolve,
-   seconds*1000+40
-  );
+    if(!started) return;
 
- });
+    paused = true;
+    pauseScreen.style.display = "flex";
+  });
 
-}
+  /* متابعة */
+  document.getElementById("resumeBtn").addEventListener("click",function(){
 
+    paused = false;
+    pauseScreen.style.display = "none";
+  });
 
-/* =========================
-   تحريك العامل للمحطة التالية
-========================= */
+  /* شراء */
+  document.getElementById("buyBtn").addEventListener("click",function(){
 
-function workerMoveToNextStation(){
+    if(money < 20){
+      say("❌ لا يوجد مال كافٍ");
+      return;
+    }
 
- if(!current)return;
+    money -= 20;
+    moneyEl.textContent = money;
 
- let type=
-  current.item.steps[current.step];
+    say("🛒 تم شراء مكونات البرجر");
+  });
 
- let station=
-  stationFor(type);
+  /* التطوير */
+  document.querySelectorAll("[data-upgrade]").forEach(function(btn){
 
- if(!station)return;
+    btn.addEventListener("click",function(){
 
- let worker=getWorker();
+      const cost = 50;
 
- if(!worker){
+      if(money < cost){
+        say("❌ المال غير كافٍ للتطوير");
+        return;
+      }
 
-  msg("👨‍🍳 كل العاملين مشغولون");
+      money -= cost;
+      moneyEl.textContent = money;
+      score += 10;
+      scoreEl.textContent = score;
 
-  return;
+      say("⬆️ تم تطوير " + btn.dataset.upgrade);
+    });
+  });
 
- }
+  /* زر التفاعل */
+  document.getElementById("action").addEventListener("click",function(){
 
- let x=station.offsetLeft+10;
- let y=station.offsetTop-75;
+    if(!started || paused) return;
 
- moveElementTo(
-  worker,
-  x,
-  y
- );
+    /*
+      لو اللاعب في المطبخ:
+      يجهز برجر.
+    */
+    if(x < 650 && y < 560){
 
-}
+      if(carrying){
+        say("🍔 معك برجر جاهز");
+      }else{
+        carrying = true;
+        player.classList.add("carrying");
+        say("🔥 تم تجهيز البرجر! خذه للزبون");
+      }
 
+      return;
+    }
 
-/* =========================
-   الأزرار اليدوية
-========================= */
+    /*
+      لو في الصالة ومعه برجر:
+      يسلم الطلب.
+    */
+    if(y >= 440 && x >= 650){
 
-function manualCook(type){
+      if(!carrying){
+        say("📋 الزبون ينتظر البرجر");
+        return;
+      }
 
- if(!started){
-  msg("▶️ ابدأ المطعم أولًا");
-  return;
- }
+      carrying = false;
+      player.classList.remove("carrying");
 
- if(paused){
-  msg("⏸️ المطعم متوقف");
-  return;
- }
+      money += 35;
+      score += 20;
+      served++;
 
- if(locked){
-  msg("🔒 افتح القفل");
-  return;
- }
+      moneyEl.textContent = money;
+      scoreEl.textContent = score;
+      servedEl.textContent = served;
 
- if(!current){
+      say("🎉 تم تسليم الطلب +35 جنيه");
 
-  msg("📋 اختر طلبًا أولًا");
-  return;
+      return;
+    }
 
- }
+    /*
+      المتجر
+    */
+    if(x >= 650 && x < 1080 && y < 450){
 
- cook(type);
+      say("🛒 اقترب من المتجر واضغط شراء");
+      return;
+    }
 
-}
+    /*
+      الكاشير
+    */
+    if(x >= 1450 && y < 450){
 
+      say("💵 الكاشير جاهز للحساب");
+      return;
+    }
 
-/* =========================
-   الطبخ
-========================= */
+    /*
+      التطوير
+    */
+    if(x >= 1080 && x < 1450 && y < 450){
 
-async function cook(type){
+      say("⬆️ اختار تطوير من لوحة التطوير");
+      return;
+    }
 
- if(!current)return;
+    say("🚶 تحرك داخل المطعم واستكشف الأماكن");
+  });
 
- if(cooking)return;
+  updatePlayer();
 
- let wanted=
-  current.item.steps[current.step];
-
- if(type!==wanted){
-
-  msg("❌ هذا ليس المطلوب الآن");
-
-  beep(180,.15);
-
-  return;
-
- }
-
- let worker=getWorker();
-
- if(!worker){
-
-  msg("👨‍🍳 العاملان مشغولان");
-
-  return;
-
- }
-
- let workerId=
-  worker.id==="chef1"
-  ?"chef1"
-  :"chef2";
-
- busyWorkers[workerId]=true;
- cooking=true;
-
- let station=
-  stationFor(type);
-
- let x=station.offsetLeft+10;
- let y=station.offsetTop-75;
-
- await moveElementTo(
-  worker,
-  x,
-  y
- );
-
- if(paused){
-
-  busyWorkers[workerId]=false;
-  cooking=false;
-  return;
-
- }
-
- worker.style.transform="scale(1.15)";
-
- $("status").textContent=
-  "🔥 جاري تجهيز "+current.item.icon;
-
- let base={
-  burger:4,
-  fries:2.5,
-  drink:1.5
- }[type];
-
- let seconds=Math.max(
-  .6,
-  base-
-  (cookLevel-1)*.55-
-  (speedLevel-1)*.12-
-  (level-1)*.05
- );
-
- await wait(seconds);
-
- worker.style.transform="scale(1)";
-
- if(!current){
-
-  busyWorkers[workerId]=false;
-  cooking=false;
-  return;
-
- }
-
- current.step++;
-
- beep(850,.12);
-
- if(
-  current.step>=
-  current.item.steps.length
- ){
-
-  await deliver(current,worker);
-
- }else{
-
-  $("status").textContent=
-   "✅ تم تجهيز جزء من الطلب. أكمل الطلب.";
-
-  busyWorkers[workerId]=false;
-  cooking=false;
-
-  workerMoveToNextStation();
-
- }
-
-}
-
-
-/* =========================
-   انتظار
-========================= */
-
-function wait(seconds){
-
- return new Promise(resolve=>{
-
-  let passed=0;
-
-  let t=setInterval(()=>{
-
-   if(!paused){
-
-    passed+=.1;
-
-   }
-
-   if(passed>=seconds){
-
-    clearInterval(t);
-    resolve();
-
-   }
-
-  },100);
-
- });
-
-}
-
-
-/* =========================
-   تسليم الطلب
-========================= */
-
-async function deliver(o,worker){
-
- if(!o||!worker)return;
-
- let table=$(
-  "table"+(o.slot+1)
- );
-
- if(!table)return;
-
- $("status").textContent=
-  "🍽️ العامل يسلّم الطلب للزبون.";
-
- await moveElementTo(
-  worker,
-  table.offsetLeft+20,
-  table.offsetTop-65
- );
-
- let dish=$("dish");
-
- dish.style.display="block";
-
- dish.style.left=
-  (worker.offsetLeft+25)+"px";
-
- dish.style.top=
-  (worker.offsetTop+20)+"px";
-
- setTimeout(()=>{
-
-  dish.style.left=
-   (table.offsetLeft+35)+"px";
-
-  dish.style.top=
-   (table.offsetTop+10)+"px";
-
- },100);
-
- await wait(.9);
-
- dish.style.display="none";
-
- await cashier(o,worker);
-
-}
-
-
-/* =========================
-   الكاشير
-========================= */
-
-async function cashier(o,worker){
-
- if(!o)return;
-
- $("status").textContent=
-  "💰 العامل يتجه إلى الكاشير.";
-
- let cash=$("cash");
-
- await moveElementTo(
-  worker,
-  cash.offsetLeft+15,
-  cash.offsetTop-75
- );
-
- await wait(.45);
-
- let earn=price(o);
-
- money+=earn;
-
- stars+=2;
-
- served++;
-
- beep(1050,.15);
- beep(1250,.12);
-
- $("status").textContent=
-  "💰 تم استلام "+earn+"ج من الزبون!";
-
- let c=$("c"+(o.slot+1));
-
- if(c){
-
-  c.style.transform="scale(1.2)";
-
-  setTimeout(()=>{
-
-   c.style.transition=
-    "left .7s linear,top .7s linear";
-
-   c.style.left="1080px";
-   c.style.top="80px";
-
-  },150);
-
- }
-
- removeOrder(o,true);
-
- levelCheck();
-
- ui();
-
-}
-
-
-/* =========================
-   حذف الطلب
-========================= */
-
-function removeOrder(o,success){
-
- let i=orders.indexOf(o);
-
- if(i>=0){
-
-  orders.splice(i,1);
-
- }
-
- if(current===o){
-
-  current=null;
-
- }
-
- if(!success){
-
-  $("status").textContent=
-   "😡 زبون غادر لأنه انتظر طويلًا.";
-
-  beep(180,.2);
-
- }
-
- render();
-
-}
-
-
-/* =========================
-   تطور المستوى
-========================= */
-
-function levelCheck(){
-
- let newLevel=
-  Math.floor(served/5)+1;
-
- if(newLevel>level){
-
-  level=newLevel;
-
-  stars+=5;
-
-  if(level>=3){
-
-   $("chef2").style.display="block";
-
-  }
-
-  msg("🎉 وصلت إلى المستوى "+level);
-
-  $("status").textContent=
-   "⭐ مستوى جديد! المطعم أصبح أسرع.";
-
-  beep(700,.12);
-  beep(950,.12);
-
- }
-
- ui();
-
-}
-
-
-/* =========================
-   المتجر
-========================= */
-
-function openShop(){
-
- if(paused){
-  msg("⏸️ أغلق المتجر بعد تشغيل المطعم");
- }
-
- $("shop").style.display="flex";
-
-}
-
-function closeShop(){
-
- $("shop").style.display="none";
-
-}
-
-
-/* =========================
-   التطوير
-========================= */
-
-function upgrade(type){
-
- let cost={
-  speed:100*speedLevel,
-  cook:120*cookLevel,
-  capacity:150*capacityLevel,
-  patience:120*patienceLevel
- }[type];
-
- if(money<cost){
-
-  msg("💰 المال غير كافٍ");
-
-  return;
-
- }
-
- money-=cost;
-
- if(type==="speed"){
-
-  speedLevel++;
-
-  msg("⚡ تم تطوير سرعة العاملين");
-
- }
-
- if(type==="cook"){
-
-  cookLevel++;
-
-  msg("🔥 تم تطوير سرعة الطبخ");
-
- }
-
- if(type==="capacity"){
-
-  capacityLevel++;
-
-  if(capacityLevel>=3){
-   $("chef2").style.display="block";
-  }
-
-  msg("👥 زادت سعة المطعم");
-
- }
-
- if(type==="patience"){
-
-  patienceLevel++;
-
-  msg("❤️ زاد صبر الزبائن");
-
- }
-
- ui();
-
- beep(850,.15);
-
-}
-
-
-/* =========================
-   إيقاف / تشغيل
-========================= */
-
-function togglePause(){
-
- if(!started)return;
-
- paused=!paused;
-
- let b=$("pauseBtn");
-
- if(paused){
-
-  b.textContent="▶️ تشغيل";
-
-  $("status").textContent=
-   "⏸️ المطعم متوقف مؤقتًا.";
-
- }else{
-
-  b.textContent="⏸️ إيقاف";
-
-  $("status").textContent=
-   "▶️ المطعم يعمل.";
-
- }
-
- beep(paused?300:700,.1);
-
-}
-
-
-/* =========================
-   الصوت
-========================= */
-
-function toggleSound(){
-
- soundOn=!soundOn;
-
- $("soundBtn").textContent=
-  soundOn?"🔊 صوت":"🔇 صامت";
-
- if(soundOn)beep(700,.1);
-
-}
-
-
-/* =========================
-   القفل
-========================= */
-
-function lockGame(){
-
- locked=!locked;
-
- $("lockBtn").textContent=
-  locked?"🔒 فتح":"🔓 قفل";
-
- msg(
-  locked?
-  "🔒 تم قفل التحكم":
-  "🔓 تم فتح التحكم"
- );
-
-}
-
-
-/* =========================
-   إنهاء اليوم
-========================= */
-
-function endDay(){
-
- if(!started)return;
-
- started=false;
-
- clearInterval(timer);
- clearInterval(spawnTimer);
- clearInterval(patienceTimer);
-
- $("result").innerHTML=
-  "<p>🍽️ الطلبات المقدمة: <b>"+
-  served+
-  "</b></p>"+
-  "<p>💰 الرصيد: <b>"+
-  Math.floor(money)+
-  "ج</b></p>"+
-  "<p>⭐ النجوم: <b>"+
-  Math.floor(stars)+
-  "</b></p>"+
-  "<p>🏆 المستوى: <b>"+
-  level+
-  "</b></p>";
-
- $("end").style.display="flex";
-
- beep(523,.2);
-
- setTimeout(()=>{
-  beep(659,.2);
- },220);
-
- setTimeout(()=>{
-  beep(784,.3);
- },440);
-
-}
-
-
-/* =========================
-   تحريك المطعم بالإصبع
-========================= */
-
-view.addEventListener(
- "pointerdown",
- e=>{
-
-  if(locked)return;
-
-  if(e.pointerType==="touch"){
-
-   dragging=true;
-
-   sx=e.clientX;
-   sy=e.clientY;
-
-   wx=parseFloat(
-    world.dataset.x||0
-   );
-
-   wy=parseFloat(
-    world.dataset.y||0
-   );
-
-  }
-
- },
- {passive:true}
-);
-
-
-view.addEventListener(
- "pointermove",
- e=>{
-
-  if(locked||!dragging)return;
-
-  let dx=e.clientX-sx;
-  let dy=e.clientY-sy;
-
-  let x=wx+dx;
-  let y=wy+dy;
-
-  world.dataset.x=x;
-  world.dataset.y=y;
-
-  world.style.transform=
-   "translate(calc(-50% + "+
-   x+
-   "px),calc(-50% + "+
-   y+
-   "px)) scale("+
-   zoom+
-   ")";
-
- },
- {passive:true}
-);
-
-
-view.addEventListener(
- "pointerup",
- ()=>{
-  dragging=false;
- }
-);
-
-
-view.addEventListener(
- "pointercancel",
- ()=>{
-  dragging=false;
- }
-);
-
-
-/* =========================
-   التكبير بإصبعين
-========================= */
-
-view.addEventListener(
- "touchstart",
- e=>{
-
-  if(e.touches.length===2){
-
-   pinch=true;
-   dragging=false;
-
-   lastDist=
-    dist(
-     e.touches[0],
-     e.touches[1]
-    );
-
-  }
-
- },
- {passive:false}
-);
-
-
-view.addEventListener(
- "touchmove",
- e=>{
-
-  if(
-   !pinch||
-   e.touches.length!==2||
-   locked
-  )return;
-
-  e.preventDefault();
-
-  let d=
-   dist(
-    e.touches[0],
-    e.touches[1]
-   );
-
-  if(lastDist>0){
-
-   zoom*=d/lastDist;
-
-  }
-
-  zoom=Math.max(
-   .65,
-   Math.min(1.5,zoom)
-  );
-
-  lastDist=d;
-
-  let x=parseFloat(
-   world.dataset.x||0
-  );
-
-  let y=parseFloat(
-   world.dataset.y||0
-  );
-
-  world.style.transform=
-   "translate(calc(-50% + "+
-   x+
-   "px),calc(-50% + "+
-   y+
-   "px)) scale("+
-   zoom+
-   ")";
-
- },
- {passive:false}
-);
-
-
-view.addEventListener(
- "touchend",
- e=>{
-
-  if(e.touches.length<2){
-
-   pinch=false;
-
-  }
-
- },
- {passive:true}
-);
-
-
-function dist(a,b){
-
- return Math.hypot(
-  a.clientX-b.clientX,
-  a.clientY-b.clientY
- );
-
-}
-
-
-/* =========================
-   تشغيل أولي
-========================= */
-
-ui();
-render();
-
+})();
 </script>
 
 </body>

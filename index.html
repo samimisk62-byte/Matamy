@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🍳 مطعمي - لعبة المطعم</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ font-family:Arial,Tahoma,sans-serif;
+ background:#10243d;
+ color:#fff;
+ overflow:hidden;
+}
+
+button{
+ border:0;
+ border-radius:12px;
+ padding:10px 15px;
+ margin:3px;
+ font-size:15px;
+ font-weight:bold;
+ cursor:pointer;
+ background:#fff;
+ color:#172b43;
+}
+
+button:active{
+ transform:scale(.96);
+}
+
+button.primary{
+ background:#ffd447;
+ color:#302500;
+}
+
+button.danger{
+ background:#ff7777;
+ color:#fff;
+}
+
+#game{
+ width:100vw;
+ height:100vh;
+ display:flex;
+ flex-direction:column;
+}
+
+.top{
+ min-height:70px;
+ background:#183451;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:8px;
+ padding:8px 12px;
+ z-index:10;
+}
+
+.title{
+ font-size:22px;
+ font-weight:bold;
+}
+
+.stats{
+ display:flex;
+ gap:6px;
+ flex-wrap:wrap;
+ justify-content:center;
+}
+
+.stat{
+ background:#0d2238;
+ padding:7px 10px;
+ border-radius:10px;
+ font-size:14px;
+}
+
+.world{
+ position:relative;
+ flex:1;
+ overflow:hidden;
+ background:
+ linear-gradient(#8bd8ff 0 25%,#d9f2d0 25% 100%);
+}
+
+.wall{
+ position:absolute;
+ top:0;
+ left:0;
+ right:0;
+ height:25%;
+ background:
+ repeating-linear-gradient(
+  90deg,
+  #ffd8a8 0 70px,
+  #ffc88a 70px 140px
+ );
+ border-bottom:8px solid #9b623c;
+}
+
+.floor{
+ position:absolute;
+ left:0;
+ right:0;
+ top:25%;
+ bottom:0;
+ background:
+ repeating-linear-gradient(
+  90deg,
+  rgba(120,80,40,.12) 0 50px,
+  transparent 50px 100px
+ ),
+ linear-gradient(#f4e1bf,#d6b98c);
+}
+
+.zone{
+ position:absolute;
+ border:3px solid rgba(70,40,15,.35);
+ border-radius:18px;
+ background:rgba(255,255,255,.22);
+ text-align:center;
+ padding:7px;
+ font-weight:bold;
+ color:#53351d;
+}
+
+#kitchen{
+ right:2%;
+ top:31%;
+ width:31%;
+ height:45%;
+}
+
+#cashier{
+ right:35%;
+ top:31%;
+ width:19%;
+ height:25%;
+}
+
+#store{
+ left:2%;
+ top:31%;
+ width:25%;
+ height:30%;
+}
+
+#door{
+ left:2%;
+ bottom:5%;
+ width:16%;
+ height:22%;
+ background:rgba(120,75,40,.25);
+}
+
+.stove{
+ position:absolute;
+ right:15%;
+ top:35%;
+ width:90px;
+ height:75px;
+ border-radius:14px;
+ background:#444;
+ border:5px solid #222;
+}
+
+.burner{
+ position:absolute;
+ width:27px;
+ height:27px;
+ border-radius:50%;
+ background:#171717;
+ border:5px solid #888;
+}
+
+.burner.one{right:12px;top:10px}
+.burner.two{left:12px;top:10px}
+.burner.three{right:12px;bottom:10px}
+.burner.four{left:12px;bottom:10px}
+
+.fire{
+ display:none;
+ position:absolute;
+ inset:18px;
+ border-radius:50%;
+ background:#ff6b00;
+ box-shadow:0 0 15px #ffb000;
+ animation:fire .35s infinite alternate;
+}
+
+.cooking .fire{
+ display:block;
+}
+
+@keyframes fire{
+ from{transform:scale(.85)}
+ to{transform:scale(1.12)}
+}
+
+.counter{
+ position:absolute;
+ right:5%;
+ bottom:8%;
+ width:90%;
+ height:55px;
+ background:#86532f;
+ border:5px solid #62391f;
+ border-radius:12px;
+}
+
+.cashbox{
+ position:absolute;
+ inset:8px;
+ background:#333;
+ border-radius:8px;
+ color:#ffe477;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-weight:bold;
+}
+
+.character{
+ position:absolute;
+ width:48px;
+ height:60px;
+ z-index:5;
+ transition:left .3s,top .3s;
+}
+
+.head{
+ position:absolute;
+ top:0;
+ left:9px;
+ width:30px;
+ height:30px;
+ border-radius:50%;
+ background:#f0b27a;
+ border:2px solid #733f22;
+}
+
+.body{
+ position:absolute;
+ top:27px;
+ left:5px;
+ width:38px;
+ height:32px;
+ border-radius:12px 12px 8px 8px;
+ background:#4b83c4;
+ border:2px solid #24496e;
+}
+
+.chef .body{
+ background:#fff;
+ border-color:#aaa;
+}
+
+.hat{
+ position:absolute;
+ top:-9px;
+ left:5px;
+ width:38px;
+ height:16px;
+ border-radius:12px;
+ background:#fff;
+ border:2px solid #bbb;
+ z-index:2;
+}
+
+.customer .body{
+ background:#e56b75;
+ border-color:#8d3139;
+}
+
+.customer.blue .body{
+ background:#65a6e8;
+}
+
+.customer.green .body{
+ background:#69bf86;
+}
+
+.customer.waiting .body{
+ animation:breathe .8s infinite alternate;
+}
+
+@keyframes breathe{
+ to{transform:translateY(-3px)}
+}
+
+.orderBubble{
+ position:absolute;
+ bottom:58px;
+ right:-25px;
+ min-width:100px;
+ padding:6px;
+ border-radius:10px;
+ background:#fff;
+ color:#222;
+ font-size:12px;
+ text-align:center;
+ box-shadow:0 3px 10px #0005;
+}
+
+.dish{
+ position:absolute;
+ width:40px;
+ height:40px;
+ border-radius:50%;
+ background:#fff;
+ border:5px solid #aaa;
+ z-index:7;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:22px;
+ box-shadow:0 3px 8px #0005;
+}
+
+.controls{
+ position:absolute;
+ left:10px;
+ bottom:10px;
+ z-index:20;
+ display:grid;
+ grid-template-columns:repeat(3,52px);
+ gap:5px;
+}
+
+.controls button{
+ margin:0;
+ padding:12px 5px;
+}
+
+.controls .up{
+ grid-column:2;
+}
+
+.controls .left{
+ grid-column:1;
+}
+
+.controls .down{
+ grid-column:2;
+}
+
+.controls .right{
+ grid-column:3;
+ grid-row:2;
+}
+
+.panel{
+ position:absolute;
+ z-index:30;
+ inset:0;
+ background:rgba(4,15,27,.8);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:18px;
+}
+
+.box{
+ width:min(560px,96vw);
+ max-height:90vh;
+ overflow:auto;
+ background:#173653;
+ border:2px solid #ffffff33;
+ border-radius:22px;
+ padding:22px;
+ text-align:center;
+ box-shadow:0 20px 60px #0008;
+}
+
+.box h1{
+ margin-top:0;
+ color:#ffd447;
+}
+
+.menu{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:10px;
+ margin:15px 0;
+}
+
+.menu button{
+ min-height:65px;
+}
+
+.hidden{
+ display:none!important;
+}
+
+.toast{
+ position:absolute;
+ top:82px;
+ left:50%;
+ transform:translateX(-50%);
+ z-index:50;
+ background:#111d;
+ padding:10px 18px;
+ border-radius:12px;
+ display:none;
+}
+
+.order-list{
+ text-align:right;
+ background:#0c2135;
+ padding:12px;
+ border-radius:12px;
+ margin-top:10px;
+}
+
+.small{
+ font-size:13px;
+ color:#c9d7e6;
+}
+
+@media(max-width:700px){
+ .top{
+  min-height:80px;
+  flex-direction:column;
+ }
+ .title{font-size:18px}
+ .stat{font-size:12px}
+ #kitchen{width:42%;height:45%}
+ #store{width:31%}
+ #cashier{right:45%;width:28%}
+ .stove{transform:scale(.8);transform-origin:top right}
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<div class="top">
+
+<div class="title">🍳 مطعمي</div>
+
+<div class="stats">
+ <div class="stat">💰 <span id="money">150</span> جنيه</div>
+ <div class="stat">⭐ <span id="score">0</span></div>
+ <div class="stat">🍽️ <span id="served">0</span></div>
+ <div class="stat">⏱️ <span id="time">180</span></div>
+</div>
+
+<div>
+ <button onclick="pauseGame()">⏸️</button>
+ <button onclick="soundToggle()">🔊</button>
+ <button onclick="showRules()">📜</button>
+ </div>
+
+</div>
+
+<div class="world">
+
+<div class="wall"></div>
+<div class="floor"></div>
+
+<div id="store" class="zone">
+🏪 المتجر
+<br>
+<button onclick="openStore()">شراء</button>
+</div>
+
+<div id="cashier" class="zone">
+💵 الكاشير
+<div class="cashbox">
+<span id="cashDisplay">0</span> جنيه
+</div>
+</div>
+
+<div id="kitchen" class="zone">
+🔥 المطبخ
+<div class="stove" id="stove">
+ <div class="burner one"></div>
+ <div class="burner two"></div>
+ <div class="burner three"></div>
+ <div class="burner four"></div>
+ <div class="fire"></div>
+</div>
+<div class="counter"></div>
+</div>
+
+<div id="door" class="zone">
+🚪
+<br>
+دخول الزبائن
+</div>
+
+<div id="chef" class="character chef" style="left:58%;top:62%">
+ <div class="hat"></div>
+ <div class="head"></div>
+ <div class="body"></div>
+</div>
+
+<div id="customers"></div>
+<div id="dishes"></div>
+
+<div class="controls">
+ <button class="up" onclick="move(0,-1)">⬆️</button>
+ <button class="left" onclick="move(-1,0)">⬅️</button>
+ <button class="down" onclick="move(0,1)">⬇️</button>
+ <button class="right" onclick="move(1,0)">➡️</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+</div>
+
+</div>
+
+<div id="startPanel" class="panel">
+
+<div class="box">
+
+<h1>🍳 مطعمي</h1>
+
+<p>
+أدر مطعمك، حضّر الطلبات، وخدم الزبائن لتحصل على المال والنقاط.
+</p>
+
+<div class="menu">
+
+<button class="primary" onclick="startGame()">
+▶️ ابدأ اللعبة
+</button>
+
+<button onclick="showRules()">
+📜 قواعد اللعبة
+</button>
+
+</div>
+
+<p class="small">
+ابدأ بشراء المكونات من المتجر، ثم حضّر الطعام على البوتاجاز وقدمه للزبون.
+</p>
+
+</div>
+
+</div>
+
+<div id="pausePanel" class="panel hidden">
+
+<div class="box">
+
+<h1>⏸️ اللعبة متوقفة</h1>
+
+<button class="primary" onclick="resumeGame()">
+▶️ متابعة
+</button>
+
+<button onclick="showRules()">
+📜 القواعد
+</button>
+
+</div>
+
+</div>
+
+<div id="rulesPanel" class="panel hidden">
+
+<div class="box">
+
+<h1>📜 قواعد مطعمي</h1>
+
+<p>👥 الزبائن يدخلون المطعم ويطلبون الطعام.</p>
+<p>🏪 استخدم المتجر لشراء المكونات.</p>
+<p>🔥 اطبخ الطلب على البوتاجاز.</p>
+<p>🍽️ بعد انتهاء الطبخ قدّم الطبق للزبون.</p>
+<p>💰 تحصل على المال عند خدمة الزبون.</p>
+<p>⭐ كل خدمة ناجحة تزيد نقاطك.</p>
+<p>⏱️ لديك وقت محدود لإدارة المطعم.</p>
+
+<button class="primary" onclick="closeRules()">
+رجوع
+</button>
+
+</div>
+
+</div>
+
+<div id="storePanel" class="panel hidden">
+
+<div class="box">
+
+<h1>🏪 متجر المكونات</h1>
+
+<p>رصيدك: <b><span id="storeMoney">150</span></b> جنيه</p>
+
+<div class="menu">
+
+<button onclick="buyIngredient('bread',10)">
+🍞 خبز<br>10 جنيه
+</button>
+
+<button onclick="buyIngredient('meat',20)">
+🥩 لحم<br>20 جنيه
+</button>
+
+<button onclick="buyIngredient('cheese',15)">
+🧀 جبنة<br>15 جنيه
+</button>
+
+<button onclick="buyIngredient('tomato',8)">
+🍅 طماطم<br>8 جنيه
+</button>
+
+<button onclick="buyIngredient('drink',10)">
+🥤 مشروب<br>10 جنيه
+</button>
+
+<button onclick="buyIngredient('oil',12)">
+🫗 زيت<br>12 جنيه
+</button>
+
+</div>
+
+<div class="order-list">
+<b>📦 المخزون</b>
+<div id="inventory"></div>
+</div>
+
+<button class="primary" onclick="closeStore()">
+إغلاق
+</button>
+
+</div>
+
+</div>
+
+<div id="cookPanel" class="panel hidden">
+
+<div class="box">
+
+<h1>👨‍🍳 المطبخ</h1>
+
+<p>اختر ماذا تريد أن تطبخ:</p>
+
+<div class="menu">
+
+<button onclick="cook('burger')">
+🍔 برجر
+</button>
+
+<button onclick="cook('cheese')">
+🧀 ساندوتش جبنة
+</button>
+
+<button onclick="cook('drink')">
+🥤 مشروب
+</button>
+
+</div>
+
+<p id="cookStatus">جاهز للطبخ.</p>
+
+<button onclick="closeCook()">
+إلغاء
+</button>
+
+</div>
+
+</div>
+
+<script>
+let money=150;
+let score=0;
+let served=0;
+let time=180;
+
+let running=false;
+let paused=false;
+let soundOn=true;
+let timer=null;
+let customerTimer=null;
+let cooking=false;
+
+let chef={
+ x:58,
+ y:62
+};
+
+let inventory={
+ bread:2,
+ meat:2,
+ cheese:2,
+ tomato:2,
+ drink:2,
+ oil:2
+};
+
+let customers=[];
+let nextCustomerId=1;
+
+const orders=[
+ {name:"برجر",icon:"🍔",cook:"burger",reward:40},
+ {name:"ساندوتش جبنة",icon:"🧀",cook:"cheese",reward:30},
+ {name:"مشروب",icon:"🥤",cook:"drink",reward:20}
+];
+
+const $=id=>document.getElementById(id);
+
+function updateUI(){
+
+ $("money").textContent=money;
+ $("score").textContent=score;
+ $("served").textContent=served;
+ $("time").textContent=time;
+ $("cashDisplay").textContent=money;
+ $("storeMoney").textContent=money;
+
+ $("inventory").innerHTML=
+ `
+ 🍞 خبز: ${inventory.bread}<br>
+ 🥩 لحم: ${inventory.meat}<br>
+ 🧀 جبنة: ${inventory.cheese}<br>
+ 🍅 طماطم: ${inventory.tomato}<br>
+ 🥤 مشروب: ${inventory.drink}<br>
+ 🫗 زيت: ${inventory.oil}
+ `;
+}
+
+function startGame(){
+
+ $("startPanel").classList.add("hidden");
+
+ running=true;
+ paused=false;
+ time=180;
+ money=150;
+ score=0;
+ served=0;
+
+ updateUI();
+
+ spawnCustomer();
+ spawnCustomer();
+
+ clearInterval(timer);
+ clearInterval(customerTimer);
+
+ timer=setInterval(()=>{
+  if(!running || paused)return;
+
+  time--;
+
+  if(time<=0){
+   time=0;
+   endGame();
+  }
+
+  updateUI();
+
+ },1000);
+
+ customerTimer=setInterval(()=>{
+  if(running && !paused){
+   if(customers.length<5)
+    spawnCustomer();
+  }
+ },5000);
+
+ toast("🍳 بدأ المطعم! الزبائن في انتظارك.");
+}
+
+function endGame(){
+
+ running=false;
+
+ clearInterval(timer);
+ clearInterval(customerTimer);
+
+ $("pausePanel").classList.remove("hidden");
+
+ $("pausePanel").querySelector(".box").innerHTML=`
+
+ <h1>🏁 انتهى الوقت</h1>
+
+ <p>⭐ النقاط: ${score}</p>
+ <p>🍽️ الطلبات التي تم تقديمها: ${served}</p>
+ <p>💰 المال: ${money} جنيه</p>
+
+ <button class="primary" onclick="location.reload()">
+ 🔄 لعبة جديدة
+ </button>
+ `;
+}
+
+function pauseGame(){
+
+ if(!running)return;
+
+ paused=true;
+ $("pausePanel").classList.remove("hidden");
+}
+
+function resumeGame(){
+
+ paused=false;
+ $("pausePanel").classList.add("hidden");
+}
+
+function soundToggle(){
+
+ soundOn=!soundOn;
+
+ toast(
+  soundOn
+  ?"🔊 الصوت يعمل"
+  :"🔇 الصوت متوقف"
+ );
+}
+
+function beep(freq=500,duration=.08){
+
+ if(!soundOn)return;
+
+ try{
+
+  const C=
+   window.AudioContext ||
+   window.webkitAudioContext;
+
+  if(!C)return;
+
+  const ctx=new C();
+
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+
+  osc.frequency.value=freq;
+  osc.type="sine";
+
+  gain.gain.value=.04;
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+
+  setTimeout(()=>{
+   osc.stop();
+   ctx.close();
+  },duration*1000);
+
+ }catch(e){}
+}
+
+function toast(text){
+
+ const t=$("toast");
+
+ t.textContent=text;
+ t.style.display="block";
+
+ clearTimeout(t._timer);
+
+ t._timer=setTimeout(()=>{
+  t.style.display="none";
+ },1800);
+}
+
+function move(dx,dy){
+
+ if(!running || paused)return;
+
+ chef.x+=dx*2;
+ chef.y+=dy*

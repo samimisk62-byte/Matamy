@@ -1,1632 +1,2008 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>🍳 مطعمي - لعبة المطعم</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>🍔 مطعمي - لعبة الطبخ</title>
 
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;
- background:#101827;
- color:#fff;
+html,body{
+ margin:0;width:100%;height:100%;overflow:hidden;
  font-family:Arial,Tahoma,sans-serif;
- overflow-x:hidden;
+ background:#111;color:#fff;user-select:none;
 }
 button{
- border:0;
- border-radius:12px;
- padding:10px 14px;
- margin:3px;
- font-weight:bold;
- font-size:15px;
- cursor:pointer;
- background:#fff;
- color:#182235;
+ border:0;border-radius:13px;padding:10px 14px;
+ font-size:15px;font-weight:bold;cursor:pointer;
 }
 button:active{transform:scale(.95)}
-.primary{background:#ffd54a}
-.green{background:#69e59b}
-.red{background:#ff7777}
-.blue{background:#6fc8ff}
-.dark{background:#29364d;color:#fff}
 
-#app{max-width:1250px;margin:auto;padding:8px}
+#game{
+ width:100%;height:100%;
+ background:#263238;
+ display:flex;flex-direction:column;
+ overflow:hidden;
+}
 
 .top{
- background:#182338;
- border:1px solid #ffffff20;
- border-radius:18px;
- padding:8px;
- display:flex;
- align-items:center;
- justify-content:space-between;
- gap:6px;
- flex-wrap:wrap;
- position:sticky;
- top:0;
- z-index:50;
+ flex:0 0 58px;background:#111;
+ display:flex;align-items:center;justify-content:space-around;
+ gap:4px;z-index:50;
 }
-.logo{font-size:21px;font-weight:bold}
-.stats{display:flex;gap:5px;flex-wrap:wrap}
 .stat{
- background:#ffffff10;
- border-radius:9px;
- padding:6px 8px;
- font-size:12px;
+ background:#292929;border-radius:10px;
+ padding:3px 6px;text-align:center;
+ font-size:10px;min-width:62px;
+}
+.stat b{
+ display:block;color:#ffd54f;font-size:16px;
 }
 
-#restaurant{
- position:relative;
- height:650px;
- margin-top:8px;
+#title{
+ flex:0 0 auto;text-align:center;
+ background:#7b1fa2;margin:0;padding:5px;
+ font-size:20px;
+}
+
+#orders{
+ flex:0 0 90px;
+ display:flex;gap:8px;
+ overflow-x:auto;
+ padding:6px;background:#37474f;
+}
+#orders::-webkit-scrollbar{display:none}
+
+.order{
+ min-width:135px;height:77px;
+ background:#fff;color:#222;
+ border:4px solid #4caf50;
+ border-radius:13px;
+ padding:4px;text-align:center;
+ cursor:pointer;
+}
+.order.selected{border-color:#ff9800;box-shadow:0 0 12px #ff9800}
+.order.angry{border-color:#f44336}
+.order h3{margin:1px;font-size:12px}
+.customer{font-size:24px}
+.timer{
+ height:5px;background:#ddd;
+ border-radius:5px;margin-top:3px;
  overflow:hidden;
- border-radius:20px;
- border:2px solid #ffffff25;
- background:#c69b68;
- box-shadow:0 15px 40px #0009;
+}
+.timer i{
+ display:block;height:100%;
+ background:#4caf50;
+}
+
+#view{
+ flex:1;
+ min-height:0;
+ overflow:hidden;
+ position:relative;
+ background:#181818;
+ touch-action:none;
+}
+
+#world{
+ position:absolute;
+ width:1200px;height:650px;
+ left:50%;top:50%;
+ transform:translate(-50%,-50%) scale(1);
+ transform-origin:center;
+ background:
+ linear-gradient(#795548 0 16%,#4e342e 16% 100%);
+ border:7px solid #3e2723;
+ border-radius:22px;
+ overflow:hidden;
 }
 
 .wall{
- position:absolute;
- top:0;left:0;right:0;
- height:65px;
- background:repeating-linear-gradient(
-  90deg,#ead09e 0 60px,#d8b77f 60px 120px
- );
- border-bottom:8px solid #6c432a;
+ position:absolute;top:0;left:0;right:0;height:70px;
+ background:#5d4037;
+ border-bottom:6px solid #3e2723;
+}
+
+.window{
+ position:absolute;top:90px;left:45px;
+ width:150px;height:100px;
+ background:#81d4fa;
+ border:9px solid #4e342e;
+}
+.window:before{
+ content:"";
+ position:absolute;left:50%;top:0;bottom:0;
+ border-left:6px solid #4e342e;
+}
+.window:after{
+ content:"";
+ position:absolute;left:0;right:0;top:50%;
+ border-top:6px solid #4e342e;
 }
 
 .sign{
- position:absolute;
- top:10px;
- left:50%;
- transform:translateX(-50%);
- background:#3a2117;
- border:3px solid #ffd54a;
- border-radius:13px;
- padding:8px 25px;
- font-size:20px;
- font-weight:bold;
- z-index:3;
-}
-
-.zone{
- position:absolute;
- border-radius:15px;
- border:3px solid #0005;
- overflow:hidden;
-}
-
-.title{
- position:absolute;
- right:7px;
- top:6px;
- z-index:3;
- background:#0009;
- border-radius:8px;
- padding:5px 8px;
- font-size:12px;
- font-weight:bold;
-}
-
-.store{
- left:12px;
- top:82px;
- width:31%;
- height:220px;
- background:#755033;
-}
-
-.kitchen{
- right:12px;
- top:82px;
- width:51%;
- height:350px;
- background:#999;
-}
-
-.dining{
- right:12px;
- bottom:20px;
- width:51%;
- height:185px;
- background:#d8b77d;
-}
-
-.cashier{
- left:12px;
- bottom:20px;
- width:31%;
- height:155px;
- background:#61402c;
-}
-
-.entrance{
- left:43%;
- bottom:20px;
- width:18%;
- height:110px;
- background:#26394c;
-}
-
-.shelf{
- position:absolute;
- top:45px;
- left:10px;
- right:10px;
- height:140px;
- background:repeating-linear-gradient(
-  0deg,#70492f 0 35px,#a67445 35px 39px
- );
-}
-
-.stock{
- position:absolute;
- font-size:23px;
- background:#fff;
- border-radius:8px;
- padding:3px;
-}
-.s1{top:53px;left:18px}
-.s2{top:53px;left:85px}
-.s3{top:53px;left:152px}
-.s4{top:100px;left:50px}
-.s5{top:100px;left:125px}
-
-.stove{
- position:absolute;
- right:25px;
- top:60px;
- width:145px;
- height:105px;
- background:#292929;
- border:5px solid #171717;
+ position:absolute;top:85px;left:300px;
+ background:#ffca28;color:#222;
+ padding:13px 30px;
  border-radius:12px;
+ font-size:24px;font-weight:bold;
 }
-.fire{
- position:absolute;
- width:34px;
- height:34px;
- border-radius:50%;
- background:radial-gradient(circle,#fff 0 15%,#ffd83d 16% 42%,#ff4b17 43% 70%,transparent 71%);
- animation:fire .4s infinite alternate;
-}
-.f1{top:10px;right:18px}
-.f2{top:10px;left:18px}
-.f3{bottom:8px;right:18px}
-.f4{bottom:8px;left:18px}
-@keyframes fire{from{transform:scale(.8)}to{transform:scale(1.15)}}
 
 .counter{
  position:absolute;
- left:10px;
- right:10px;
- bottom:12px;
- height:48px;
- background:#573925;
- border:4px solid #392419;
- border-radius:9px;
+ left:120px;right:120px;bottom:65px;
+ height:115px;
+ background:#6d4c41;
+ border:8px solid #3e2723;
+ border-radius:22px;
+}
+.counter:before{
+ content:"";
+ position:absolute;
+ left:-8px;right:-8px;top:-22px;
+ height:30px;
+ background:#a1887f;
+ border:7px solid #3e2723;
+ border-radius:15px;
 }
 
-.register{
+.station{
  position:absolute;
- top:42px;
- right:15px;
- width:95px;
- height:65px;
- background:#182235;
- border:5px solid #444;
- border-radius:9px;
+ width:130px;height:95px;
+ background:#263238;
+ border:6px solid #111;
+ border-radius:17px;
  text-align:center;
- padding-top:8px;
+ padding:7px;
+ font-size:38px;
+ z-index:5;
+ box-shadow:0 5px 12px #0008;
 }
-.register span{color:#72ffae;font-size:11px}
+.station small{
+ display:block;
+ font-size:13px;
+}
+#grill{right:100px;bottom:78px}
+#fryer{right:250px;bottom:78px}
+#drink{right:400px;bottom:78px}
+#cash{left:100px;bottom:78px}
 
 .table{
  position:absolute;
- width:100px;
- height:55px;
- background:#704629;
- border:5px solid #4b2d1c;
- border-radius:50%;
+ width:120px;height:70px;
+ background:#8d6e63;
+ border:7px solid #3e2723;
+ border-radius:20px;
+ text-align:center;
+ padding-top:17px;
+ font-size:26px;
 }
-.table:after{
- content:"🍽️";
- position:absolute;
- left:34px;
- top:10px;
- font-size:25px;
-}
-.t1{right:25px;top:42px}
-.t2{right:160px;top:100px}
-.t3{left:25px;bottom:15px}
 
-.character{
+#table1{left:250px;top:250px}
+#table2{left:430px;top:250px}
+#table3{left:610px;top:250px}
+#table4{left:790px;top:250px}
+#table5{left:330px;top:155px}
+#table6{left:500px;top:155px}
+#table7{left:670px;top:155px}
+#table8{left:840px;top:155px}
+
+.person{
  position:absolute;
- width:45px;
- height:58px;
- z-index:12;
- transition:left .2s linear,top .2s linear;
+ width:80px;
+ text-align:center;
+ font-size:47px;
+ z-index:15;
+ transition:left .7s linear,top .7s linear,transform .25s;
 }
-.charBody{
- width:38px;
- height:38px;
- margin:auto;
- border-radius:50%;
- background:#fff;
- border:2px solid #0005;
- display:flex;
- align-items:center;
- justify-content:center;
- font-size:25px;
- box-shadow:0 5px 10px #0007;
-}
-.tag{
+.person small{
+ display:block;
  background:#000b;
- border-radius:5px;
- padding:2px 4px;
- font-size:9px;
- white-space:nowrap;
- text-align:center;
- transform:translateX(50%);
+ border-radius:8px;
+ font-size:11px;
+ padding:2px;
 }
-.bubble{
- position:absolute;
- bottom:48px;
- right:-30px;
- background:white;
- color:#111;
- border-radius:10px;
- padding:5px;
- font-size:10px;
- min-width:75px;
- text-align:center;
-}
-.bubble:after{
- content:"";
- position:absolute;
- bottom:-7px;
- right:30px;
- border-width:7px 7px 0;
- border-style:solid;
- border-color:white transparent transparent;
-}
+.chef{z-index:20}
 
-#player{
+.dish{
  position:absolute;
- width:52px;
- height:62px;
- z-index:20;
- pointer-events:none;
-}
-#player .charBody{
- width:44px;
- height:44px;
- background:#ffd54a;
- font-size:29px;
-}
-
-.controls{
- position:absolute;
- left:10px;
- bottom:10px;
+ display:none;
+ font-size:36px;
  z-index:30;
- display:grid;
- grid-template-columns:repeat(3,45px);
- gap:4px;
+ transition:left .8s linear,top .8s linear;
 }
-.controls button{
- width:45px;
- height:42px;
- padding:0;
- margin:0;
-}
-.up{grid-column:2}
-.left{grid-column:1}
-.down{grid-column:2}
-.right{grid-column:3}
 
-#message{
- position:absolute;
- bottom:12px;
- left:50%;
- transform:translateX(-50%);
- background:#07101ddd;
- border:1px solid #ffffff25;
- border-radius:12px;
- padding:9px 14px;
- min-width:220px;
- max-width:88%;
- text-align:center;
- z-index:35;
+#controls{
+ flex:0 0 auto;
+ background:#263238;
+ padding:6px;
+}
+
+.actions{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:6px;
+}
+.action{
+ background:#455a64;
+ color:#fff;
+ min-height:55px;
  font-size:13px;
 }
-
-.panel{
- margin-top:8px;
- background:#182338;
- border:1px solid #ffffff20;
- border-radius:16px;
- padding:10px;
+.action span{
+ display:block;
+ font-size:24px;
 }
-.panel h2{margin:3px 0 9px;font-size:19px}
 
-.grid{
+.tools{
  display:grid;
- grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
- gap:7px;
-}
-
-.card{
- background:#ffffff0d;
- border:1px solid #ffffff18;
- border-radius:12px;
- padding:9px;
-}
-.card b{font-size:17px}
-
-.progress{
- height:8px;
- background:#0008;
- border-radius:8px;
- overflow:hidden;
+ grid-template-columns:repeat(5,1fr);
+ gap:5px;
  margin-top:6px;
 }
-.progress i{
- display:block;
- height:100%;
- width:0;
- background:#ffd54a;
+.tools button{
+ background:#ffca28;
+ color:#222;
+ font-size:11px;
+ padding:8px 3px;
+}
+
+#status{
+ background:#212121;
+ padding:5px 8px;
+ text-align:center;
+ font-size:12px;
+}
+
+#message{
+ position:fixed;
+ bottom:125px;
+ left:50%;
+ transform:translateX(-50%);
+ background:#000e;
+ padding:10px 18px;
+ border-radius:25px;
+ z-index:300;
+ display:none;
+ white-space:nowrap;
 }
 
 .modal{
  position:fixed;
  inset:0;
- background:#000b;
- z-index:100;
- display:flex;
- align-items:center;
- justify-content:center;
- padding:12px;
-}
-.modalBox{
- width:min(520px,100%);
- max-height:90vh;
- overflow:auto;
- background:#182338;
- border:2px solid #ffffff20;
- border-radius:20px;
- padding:18px;
-}
-.hidden{display:none!important}
-
-.overlay{
- position:fixed;
- inset:0;
- z-index:200;
- background:#050a13ee;
- display:flex;
+ background:#000d;
+ z-index:250;
+ display:none;
  align-items:center;
  justify-content:center;
  padding:15px;
 }
-.start{
- width:min(520px,100%);
- background:#182338;
- border:2px solid #ffd54a;
- border-radius:25px;
- padding:25px;
+
+.box{
+ background:#263238;
+ border:4px solid #ffca28;
+ border-radius:22px;
+ padding:18px;
+ width:100%;
+ max-width:460px;
  text-align:center;
 }
-.start .emoji{font-size:58px}
-.start h1{font-size:35px;margin:5px}
-.start p{line-height:1.7;color:#d7e3f5}
 
-.money{color:#73ffac;font-weight:bold}
-.warn{color:#ffd76a}
+.box h1{margin:4px;font-size:34px}
+
+.start{
+ width:100%;
+ background:#ffca28;
+ color:#222;
+ font-size:21px;
+ margin-top:10px;
+}
+
+.shoprow{
+ background:#37474f;
+ padding:10px;
+ margin:7px 0;
+ border-radius:12px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.shoprow button{
+ background:#ffca28;
+ font-size:12px;
+}
+
+.close{
+ width:100%;
+ background:#ef5350;
+ color:#fff;
+ margin-top:8px;
+}
+
+#hint{
+ position:absolute;
+ right:10px;
+ top:10px;
+ background:#0009;
+ padding:7px 10px;
+ border-radius:12px;
+ font-size:11px;
+ z-index:40;
+}
 
 @media(max-width:700px){
- #restaurant{height:570px}
- .sign{font-size:16px;padding:7px 14px}
- .store{width:34%;left:7px}
- .cashier{width:34%;left:7px}
- .kitchen{width:55%;right:7px}
- .dining{width:55%;right:7px}
- .entrance{left:39%;width:22%}
- .table{transform:scale(.78)}
- .stove{transform:scale(.7);transform-origin:top right}
- .register{transform:scale(.7);transform-origin:top right}
+ #world{
+  width:1050px;
+  height:600px;
+ }
+ .station{
+  width:115px;
+  height:85px;
+  font-size:32px;
+ }
+ .top .stat{
+  min-width:54px;
+ }
 }
 </style>
 </head>
 
 <body>
 
-<div id="start" class="overlay">
- <div class="start">
-  <div class="emoji">🍳👨‍🍳🏪</div>
-  <h1>مطعمي</h1>
-  <h2>لعبة المطعم الحقيقي</h2>
+<!-- شاشة البداية -->
+<div id="start" class="modal"
+ style="display:flex;background:linear-gradient(145deg,#4a148c,#ff6f00)">
+ <div class="box">
+  <h1>🍔 مطعمي</h1>
+  <h2>👨‍🍳 مغامرة المطعم</h2>
+  <p>العاملون والزبائن يتحركون تلقائيًا حسب الطلبات.</p>
   <p>
-   افتح مطعمك، استقبل الزبائن، حضّر الطعام،
-   شغّل الشيفات والعمال، اكسب المال وطوّر مطعمك.
+   👆 اسحب المطعم بإصبعك للتحرك.<br>
+   🔍 استخدم إصبعين للتكبير والتصغير.
   </p>
-  <button class="primary" style="font-size:20px;padding:14px 30px"
-          onclick="startGame()">▶️ ابدأ اللعبة</button>
-  <button onclick="rules()">📖 القواعد</button>
+  <button class="start" onclick="startGame()">ابدأ المطعم ▶️</button>
  </div>
 </div>
 
-<div id="app">
+<div id="game">
 
  <div class="top">
-  <div class="logo">🍳 مطعمي</div>
-
-  <div class="stats">
-   <div class="stat">💰 <span id="money">500</span> ج</div>
-   <div class="stat">🏦 <span id="bank">0</span></div>
-   <div class="stat">⭐ <span id="rep">50</span></div>
-   <div class="stat">🏆 <span id="score">0</span></div>
-   <div class="stat">👥 <span id="served">0</span></div>
-   <div class="stat">📈 <span id="level">1</span></div>
-  </div>
-
-  <div>
-   <button class="blue" onclick="pauseGame()" id="pause">⏸️</button>
-   <button onclick="rules()">📖</button>
-   <button onclick="toggleSound()">🔊</button>
-  </div>
+  <div class="stat">💰<b id="money">100</b>ج</div>
+  <div class="stat">⭐<b id="stars">0</b></div>
+  <div class="stat">🏆<b id="level">1</b></div>
+  <div class="stat">👥<b id="capacity">4</b></div>
+  <div class="stat">🍽️<b id="served">0</b></div>
+  <div class="stat">⏱️<b id="time">180</b></div>
  </div>
 
- <div id="restaurant">
+ <h1 id="title">🍔 مطعمي الكبير</h1>
 
-  <div class="wall"></div>
-  <div class="sign">🍳 مطعمي ⭐</div>
+ <div id="orders"></div>
 
-  <div class="zone store">
-   <div class="title">🏪 المتجر</div>
-   <div class="shelf">
-    <div class="stock s1">🥩</div>
-    <div class="stock s2">🍞</div>
-    <div class="stock s3">🧀</div>
-    <div class="stock s4">🍅</div>
-    <div class="stock s5">🥤</div>
+ <div id="view">
+
+  <div id="world">
+
+   <div class="wall"></div>
+   <div class="window"></div>
+   <div class="sign">🍔 مطعمي</div>
+
+   <div class="table" id="table1">🪑🍽️</div>
+   <div class="table" id="table2">🪑🍽️</div>
+   <div class="table" id="table3">🪑🍽️</div>
+   <div class="table" id="table4">🪑🍽️</div>
+   <div class="table" id="table5">🪑🍽️</div>
+   <div class="table" id="table6">🪑🍽️</div>
+   <div class="table" id="table7">🪑🍽️</div>
+   <div class="table" id="table8">🪑🍽️</div>
+
+   <div class="station" id="grill">
+    🔥<small>الشواية</small>
    </div>
-  </div>
 
-  <div class="zone kitchen">
-   <div class="title">🔥 المطبخ</div>
-   <div class="stove">
-    <div class="fire f1"></div>
-    <div class="fire f2"></div>
-    <div class="fire f3"></div>
-    <div class="fire f4"></div>
+   <div class="station" id="fryer">
+    🍟<small>القلاية</small>
    </div>
+
+   <div class="station" id="drink">
+    🥤<small>المشروبات</small>
+   </div>
+
+   <div class="station" id="cash">
+    💰<small>الكاشير</small>
+   </div>
+
    <div class="counter"></div>
-  </div>
 
-  <div class="zone dining">
-   <div class="title">🍽️ الصالة</div>
-   <div class="table t1"></div>
-   <div class="table t2"></div>
-   <div class="table t3"></div>
-  </div>
-
-  <div class="zone cashier">
-   <div class="title">💳 الكاشير</div>
-   <div class="register">
-    💵<br>
-    <span id="cashier">جاهز</span>
+   <!-- العاملون -->
+   <div class="person chef"
+        id="chef1"
+        style="left:520px;top:390px">
+    👨‍🍳<small>الطباخ</small>
    </div>
+
+   <div class="person chef"
+        id="chef2"
+        style="left:650px;top:390px;display:none">
+    👩‍🍳<small>المساعد</small>
+   </div>
+
+   <!-- الزبائن -->
+   <div class="person" id="c1"
+        style="left:250px;top:335px">
+    👩<small>زبونة</small>
+   </div>
+
+   <div class="person" id="c2"
+        style="left:430px;top:335px">
+    👨<small>زبون</small>
+   </div>
+
+   <div class="person" id="c3"
+        style="left:610px;top:335px">
+    👩‍🦱<small>زبونة</small>
+   </div>
+
+   <div class="person" id="c4"
+        style="left:790px;top:335px">
+    👨‍🦱<small>زبون</small>
+   </div>
+
+   <div class="person" id="c5"
+        style="left:330px;top:100px;display:none">
+    👩<small>زبونة</small>
+   </div>
+
+   <div class="person" id="c6"
+        style="left:500px;top:100px;display:none">
+    👨<small>زبون</small>
+   </div>
+
+   <div class="person" id="c7"
+        style="left:670px;top:100px;display:none">
+    👩‍🦱<small>زبونة</small>
+   </div>
+
+   <div class="person" id="c8"
+        style="left:840px;top:100px;display:none">
+    👨‍🦱<small>زبون</small>
+   </div>
+
+   <div class="dish" id="dish">🍽️</div>
+
   </div>
 
-  <div class="zone entrance">
-   <div class="title">🚪 الدخول</div>
+  <div id="hint">
+   👆 اسحب لتحريك المطعم • 🔍 إصبعان للتكبير
   </div>
 
-  <div id="characters"></div>
-
-  <div id="player">
-   <div class="charBody">👨‍🍳</div>
-   <div class="tag">أنت</div>
-  </div>
-
-  <div class="controls">
-   <button class="up" onclick="move(0,-1)">⬆️</button>
-   <button class="left" onclick="move(-1,0)">⬅️</button>
-   <button class="down" onclick="move(0,1)">⬇️</button>
-   <button class="right" onclick="move(1,0)">➡️</button>
-  </div>
-
-  <div id="message">افتح المطعم وابدأ العمل!</div>
  </div>
 
- <div class="panel">
-  <h2>📋 الطلبات الحالية</h2>
-  <div id="orders" class="grid"></div>
- </div>
+ <div id="status">المطعم جاهز.</div>
 
- <div class="panel">
-  <h2>📦 المخزن</h2>
-  <div id="inventory" class="grid"></div>
-  <div style="margin-top:8px">
-   <button class="primary" onclick="store()">🏪 المتجر</button>
-   <button onclick="menu()">🍽️ القائمة</button>
-   <button class="green" onclick="hire()">👷 توظيف عامل</button>
-   <button class="blue" onclick="upgrade()">⬆️ تطوير</button>
+ <div id="controls">
+
+  <div class="actions">
+   <button class="action" onclick="manualCook('burger')">
+    <span>🍔</span>برجر
+   </button>
+
+   <button class="action" onclick="manualCook('fries')">
+    <span>🍟</span>بطاطس
+   </button>
+
+   <button class="action" onclick="manualCook('drink')">
+    <span>🥤</span>مشروب
+   </button>
   </div>
- </div>
 
- <div class="panel">
-  <h2>🎯 مهام</h2>
-  <div id="missions"></div>
- </div>
+  <div class="tools">
+   <button onclick="togglePause()" id="pauseBtn">⏸️ إيقاف</button>
+   <button onclick="openShop()">🏪 تطوير</button>
+   <button onclick="toggleSound()" id="soundBtn">🔊 صوت</button>
+   <button onclick="lockGame()" id="lockBtn">🔓 قفل</button>
+   <button onclick="endDay()">🏁 إنهاء</button>
+  </div>
 
+ </div>
 </div>
 
-<div id="modal" class="modal hidden">
- <div id="modalBox" class="modalBox"></div>
+<div id="message"></div>
+
+<!-- المتجر -->
+<div id="shop" class="modal">
+ <div class="box">
+
+  <h2>🛠️ تطوير أداء المطعم</h2>
+
+  <div class="shoprow">
+   <span>
+    ⚡ سرعة العاملين<br>
+    <small>تسريع الحركة والخدمة</small>
+   </span>
+   <button onclick="upgrade('speed')">100ج</button>
+  </div>
+
+  <div class="shoprow">
+   <span>🔥 سرعة الطبخ</span>
+   <button onclick="upgrade('cook')">120ج</button>
+  </div>
+
+  <div class="shoprow">
+   <span>👥 زيادة سعة الزبائن</span>
+   <button onclick="upgrade('capacity')">150ج</button>
+  </div>
+
+  <div class="shoprow">
+   <span>❤️ صبر الزبائن</span>
+   <button onclick="upgrade('patience')">120ج</button>
+  </div>
+
+  <button class="close" onclick="closeShop()">إغلاق</button>
+
+ </div>
+</div>
+
+<!-- النهاية -->
+<div id="end" class="modal">
+ <div class="box">
+  <h1>🎉 انتهى اليوم!</h1>
+  <div id="result"></div>
+  <button class="start" onclick="location.reload()">
+   يوم جديد 🔄
+  </button>
+ </div>
 </div>
 
 <script>
+"use strict";
 
-const recipes={
- burger:{
-  name:"🍔 برجر",
-  price:45,
-  time:5,
-  need:{meat:1,bread:1,tomato:1}
- },
- cheese:{
-  name:"🥪 ساندوتش جبنة",
-  price:30,
-  time:4,
-  need:{bread:1,cheese:1}
- },
- pizza:{
-  name:"🍕 بيتزا",
-  price:60,
-  time:7,
-  need:{bread:1,cheese:1,tomato:1}
- },
- drink:{
-  name:"🥤 مشروب",
-  price:20,
-  time:2,
-  need:{drink:1}
- }
-};
+/* =========================
+   المتغيرات الأساسية
+========================= */
 
-const inventory={
- meat:5,
- bread:8,
- cheese:5,
- tomato:6,
- drink:8
-};
-
-let money=500;
-let bank=0;
-let reputation=50;
-let score=0;
-let served=0;
-let level=1;
-let xp=0;
-
-let customers=[];
-let workers=[];
-let orders=[];
-let dishes=[];
-
-let running=false;
+let started=false;
 let paused=false;
-let sound=true;
+let locked=false;
+let soundOn=true;
 
-let nextCustomer=1;
-let nextOrder=1;
+let money=100;
+let stars=0;
+let level=1;
+let served=0;
 
-let player={
- x:610,
- y:500,
- speed:6
-};
+let speedLevel=1;
+let cookLevel=1;
+let capacityLevel=1;
+let patienceLevel=1;
 
-let spawnTime=0;
+let orders=[];
+let current=null;
+let number=0;
+
+let timer=null;
+let spawnTimer=null;
+let patienceTimer=null;
+
+let time=180;
+let cooking=false;
+
 let audio=null;
-let musicTimer=null;
+
+let view=document.getElementById("view");
+let world=document.getElementById("world");
+
+let dragging=false;
+let pinch=false;
+
+let sx=0;
+let sy=0;
+let wx=0;
+let wy=0;
+let lastDist=0;
+
+let zoom=1;
+
+let busyWorkers={
+ chef1:false,
+ chef2:false
+};
 
 
 /* =========================
- الصوت
+   اختصار العناصر
 ========================= */
 
-function initAudio(){
-
- if(audio)return;
-
- try{
-  const AC=window.AudioContext||window.webkitAudioContext;
-  audio=new AC();
- }catch(e){}
+function $(id){
+ return document.getElementById(id);
 }
 
-function beep(freq=440,time=.1){
 
- if(!sound||!audio)return;
+/* =========================
+   الصوت
+========================= */
+
+function beep(f=500,d=.12){
+
+ if(!soundOn)return;
 
  try{
 
-  if(audio.state==="suspended")
+  audio=audio||
+   new(window.AudioContext||window.webkitAudioContext)();
+
+  if(audio.state==="suspended"){
    audio.resume();
+  }
 
-  const o=audio.createOscillator();
-  const g=audio.createGain();
+  let o=audio.createOscillator();
+  let g=audio.createGain();
 
-  o.frequency.value=freq;
-  o.type="sine";
+  o.frequency.value=f;
 
-  g.gain.setValueAtTime(.0001,audio.currentTime);
-  g.gain.exponentialRampToValueAtTime(
-   .06,audio.currentTime+.02
+  g.gain.setValueAtTime(
+   .001,
+   audio.currentTime
   );
+
   g.gain.exponentialRampToValueAtTime(
-   .0001,audio.currentTime+time
+   .13,
+   audio.currentTime+.02
+  );
+
+  g.gain.exponentialRampToValueAtTime(
+   .001,
+   audio.currentTime+d
   );
 
   o.connect(g);
   g.connect(audio.destination);
 
   o.start();
-  o.stop(audio.currentTime+time+.02);
+  o.stop(audio.currentTime+d+.03);
 
  }catch(e){}
 }
 
-function startMusic(){
 
- if(!sound||!audio||musicTimer)return;
+/* =========================
+   الرسائل
+========================= */
 
- const notes=[262,330,392,330,294,349,440,349];
- let i=0;
+function msg(t){
 
- musicTimer=setInterval(()=>{
+ let m=$("message");
 
-  if(running&&!paused)
-   beep(notes[i++%notes.length],.12);
+ m.textContent=t;
+ m.style.display="block";
 
- },1200);
-}
+ clearTimeout(msg.t);
 
-function stopMusic(){
-
- if(musicTimer){
-  clearInterval(musicTimer);
-  musicTimer=null;
- }
-}
-
-function toggleSound(){
-
- sound=!sound;
-
- if(sound){
-  initAudio();
-  startMusic();
-  say("🔊 الموسيقى والمؤثرات تعمل");
- }else{
-  stopMusic();
-  say("🔇 تم إيقاف الصوت");
- }
+ msg.t=setTimeout(()=>{
+  m.style.display="none";
+ },1800);
 }
 
 
 /* =========================
- البداية
+   تحديث البيانات
+========================= */
+
+function ui(){
+
+ $("money").textContent=Math.floor(money);
+ $("stars").textContent=Math.floor(stars);
+ $("level").textContent=level;
+ $("served").textContent=served;
+ $("capacity").textContent=maxCustomers();
+ $("time").textContent=time;
+}
+
+
+/* =========================
+   سعة المطعم
+========================= */
+
+function maxCustomers(){
+
+ return Math.min(
+  8,
+  4+(capacityLevel-1)*2+
+  Math.floor((level-1)/2)*2
+ );
+}
+
+
+/* =========================
+   قائمة الطعام
+========================= */
+
+function getMenu(){
+
+ let r=Math.random();
+
+ if(level>=4 && r>.75){
+
+  return{
+   name:"وجبة كاملة",
+   icon:"🍔🍟🥤",
+   price:85,
+   steps:["burger","fries","drink"]
+  };
+
+ }
+
+ if(r<.42){
+
+  return{
+   name:"برجر",
+   icon:"🍔",
+   price:45,
+   steps:["burger"]
+  };
+
+ }
+
+ if(r<.72){
+
+  return{
+   name:"بطاطس",
+   icon:"🍟",
+   price:25,
+   steps:["fries"]
+  };
+
+ }
+
+ return{
+  name:"مشروب",
+  icon:"🥤",
+  price:20,
+  steps:["drink"]
+ };
+
+}
+
+
+/* =========================
+   ربح إضافي
+========================= */
+
+function profitBonus(){
+
+ return Math.max(
+  0,
+  Math.floor((level-1)/2)
+ );
+
+}
+
+
+/* =========================
+   سعر الطلب
+========================= */
+
+function price(o){
+
+ return o.item.price+
+ (level*3)+
+ (profitBonus()*10);
+
+}
+
+
+/* =========================
+   وقت الزبون
+========================= */
+
+function customerTime(){
+
+ return 30+
+ patienceLevel*7+
+ level*2;
+
+}
+
+
+/* =========================
+   بدء اللعبة
 ========================= */
 
 function startGame(){
 
- initAudio();
-
- if(audio&&audio.state==="suspended")
-  audio.resume();
-
- running=true;
+ started=true;
  paused=false;
+ locked=false;
 
- document.getElementById("start").classList.add("hidden");
+ $("start").style.display="none";
 
- spawnCustomer();
- spawnCustomer();
+ try{
+  audio=audio||
+   new(window.AudioContext||window.webkitAudioContext)();
 
- say("🍳 المطعم فتح!");
- startMusic();
+  audio.resume();
+ }catch(e){}
 
- last=performance.now();
- requestAnimationFrame(loop);
-}
-
-
-/* =========================
- الحلقة
-========================= */
-
-let last=performance.now();
-
-function loop(now){
-
- if(!running)return;
-
- const dt=Math.min(.05,(now-last)/1000);
- last=now;
-
- if(!paused){
-
-  spawnTime+=dt;
-
-  if(spawnTime>=6){
-   spawnTime=0;
-   spawnCustomer();
-  }
-
-  keyboardMove();
-  updateCustomers(dt);
-  updateOrders(dt);
-  updateDishes(dt);
-  updateWorkers(dt);
- }
+ ui();
 
  render();
 
- requestAnimationFrame(loop);
+ $("status").textContent=
+  "🍽️ المطعم بدأ! اختر طلبًا من الأعلى.";
+
+ clearInterval(timer);
+ clearInterval(spawnTimer);
+ clearInterval(patienceTimer);
+
+ timer=setInterval(gameTimer,1000);
+
+ spawnTimer=setInterval(()=>{
+  if(!paused){
+   spawn();
+  }
+ },4200);
+
+ patienceTimer=setInterval(()=>{
+  if(!paused){
+   decreasePatience();
+  }
+ },1000);
+
+ setTimeout(()=>{
+  spawn();
+ },700);
+
+ setTimeout(()=>{
+  spawn();
+ },1700);
+
+ beep(660,.15);
+
 }
 
 
 /* =========================
- اللاعب
+   عداد الوقت
 ========================= */
 
-let keys={};
+function gameTimer(){
 
-document.addEventListener("keydown",e=>{
- keys[e.key]=true;
-});
+ if(!started||paused)return;
 
-document.addEventListener("keyup",e=>{
- keys[e.key]=false;
-});
+ time--;
 
-function keyboardMove(){
+ ui();
 
- let dx=0;
- let dy=0;
-
- if(keys.ArrowLeft)dx=-1;
- if(keys.ArrowRight)dx=1;
- if(keys.ArrowUp)dy=-1;
- if(keys.ArrowDown)dy=1;
-
- if(dx||dy){
-
-  player.x+=dx*player.speed;
-  player.y+=dy*player.speed;
-
-  limitPlayer();
- }
-}
-
-function move(dx,dy){
-
- if(!running||paused)return;
-
- player.x+=dx*player.speed*10;
- player.y+=dy*player.speed*10;
-
- limitPlayer();
-
- interact();
-
- beep(230,.04);
-}
-
-function limitPlayer(){
-
- player.x=Math.max(5,Math.min(1170,player.x));
- player.y=Math.max(70,Math.min(575,player.y));
-}
-
-function interact(){
-
- if(player.x<500&&player.y<310){
-  store();
-  return;
+ if(time<=0){
+  endDay();
  }
 
- if(player.x>580&&player.y<430){
-  const r=orders.find(o=>o.state==="cooking");
-  say(r?"🔥 جاري طبخ "+r.name:"🔥 المطبخ جاهز");
-  return;
- }
-
- if(player.x<500&&player.y>360){
-  say("💳 الكاشير جاهز لاستقبال الزبائن.");
-  return;
- }
-
- say("🚶 تحرك داخل المطعم.");
 }
 
 
 /* =========================
- الزبائن
+   الطلبات
 ========================= */
 
-function spawnCustomer(){
+function spawn(){
 
- if(customers.length>=8)return;
+ if(!started||paused)return;
 
- const takeaway=Math.random()<.3;
+ if(orders.length>=maxCustomers())return;
 
- const c={
-  id:nextCustomer++,
-  x:620+Math.random()*80,
-  y:580,
-  tx:takeaway?470:750+Math.random()*180,
-  ty:takeaway?340:430+Math.random()*80,
-  speed:22+Math.random()*10,
-  state:"enter",
-  patience:100,
-  takeaway,
-  order:null,
-  eat:0
+ let item=getMenu();
+
+ let o={
+  id:++number,
+  item:item,
+  left:customerTime(),
+  max:customerTime(),
+  step:0,
+  angry:false,
+  slot:getFreeSlot(),
+  customer:[
+   "👩","👨","👩‍🦱","👨‍🦱"
+  ][Math.floor(Math.random()*4)]
  };
 
- customers.push(c);
+ if(o.slot<0)return;
 
- const el=document.createElement("div");
-
- el.id="customer_"+c.id;
- el.className="character";
-
- el.innerHTML=`
-  <div class="charBody">🧑</div>
-  <div class="tag">${takeaway?"تيك أواي":"زبون"}</div>
- `;
-
- document.getElementById("characters").appendChild(el);
-
- beep(400,.07);
-}
-
-function toward(o,tx,ty,dt){
-
- const dx=tx-o.x;
- const dy=ty-o.y;
- const d=Math.hypot(dx,dy);
-
- if(d<3)return true;
-
- o.x+=dx/d*o.speed*dt;
- o.y+=dy/d*o.speed*dt;
-
- return false;
-}
-
-function updateCustomers(dt){
-
- customers.forEach(c=>{
-
-  if(c.state==="enter"){
-
-   if(toward(c,c.tx,c.ty,dt)){
-
-    c.state="waiting";
-    createOrder(c);
-   }
-  }
-
-  else if(c.state==="waiting"){
-
-   c.patience-=dt*1.5;
-
-   if(c.patience<=0){
-
-    c.state="leave";
-    c.tx=620;
-    c.ty=590;
-
-    reputation=Math.max(0,reputation-2);
-
-    say("😟 زبون غادر بسبب الانتظار.");
-   }
-  }
-
-  else if(c.state==="eating"){
-
-   c.eat-=dt;
-
-   if(c.eat<=0){
-
-    c.state="pay";
-    c.tx=320;
-    c.ty=380;
-   }
-  }
-
-  else if(c.state==="pay"){
-
-   if(toward(c,c.tx,c.ty,dt)){
-
-    const amount=c.order?.price||20;
-
-    money+=amount;
-    bank+=Math.round(amount*.1);
-    score+=amount;
-    served++;
-
-    reputation=Math.min(100,reputation+1);
-    xp+=25;
-
-    say("💰 الزبون دفع "+amount+" جنيه.");
-
-    beep(880,.1);
-    beep(1100,.15);
-
-    c.state="leave";
-    c.tx=620;
-    c.ty=590;
-   }
-  }
-
-  else if(c.state==="leave"){
-
-   if(toward(c,c.tx,c.ty,dt)){
-
-    const el=document.getElementById("customer_"+c.id);
-    if(el)el.remove();
-
-    customers=customers.filter(x=>x!==c);
-   }
-  }
- });
-}
-
-
-/* =========================
- الطلبات
-========================= */
-
-function createOrder(c){
-
- const types=Object.keys(recipes);
- const type=types[Math.floor(Math.random()*types.length)];
- const r=recipes[type];
-
- const o={
-  id:nextOrder++,
-  customer:c,
-  type,
-  name:r.name,
-  price:r.price,
-  time:r.time,
-  need:{...r.need},
-  progress:0,
-  state:"new"
- };
-
- c.order=o;
  orders.push(o);
 
- say("📋 طلب جديد: "+o.name);
- beep(520,.1);
+ moveCustomerToTable(o);
+
+ render();
+
+ $("status").textContent=
+  "🔔 زبون جديد! يريد "+
+  item.icon+" "+item.name;
+
+ beep(550,.08);
+
 }
 
-function canCook(need){
 
- for(const k in need){
+/* =========================
+   إيجاد مكان زبون
+========================= */
 
-  if((inventory[k]||0)<need[k])
-   return false;
+function getFreeSlot(){
+
+ for(let i=0;i<maxCustomers();i++){
+
+  let used=orders.some(o=>o.slot===i);
+
+  if(!used)return i;
+
  }
 
- return true;
+ return -1;
 }
 
-function useIngredients(need){
 
- for(const k in need)
-  inventory[k]-=need[k];
+/* =========================
+   حركة الزبون إلى الطاولة
+========================= */
+
+function moveCustomerToTable(o){
+
+ let c=$("c"+(o.slot+1));
+
+ let table=$("table"+(o.slot+1));
+
+ if(!c||!table)return;
+
+ c.textContent=o.customer;
+
+ let small=document.createElement("small");
+ small.textContent="زبون";
+ c.appendChild(small);
+
+ c.style.display="block";
+
+ let x=table.offsetLeft+20;
+ let y=table.offsetTop-5;
+
+ let seconds=Math.max(
+  .5,
+  .9-(speedLevel*.07)
+ );
+
+ c.style.transition=
+  "left "+seconds+"s linear,top "+seconds+"s linear";
+
+ c.style.left=x+"px";
+ c.style.top=y+"px";
+
 }
 
-function updateOrders(dt){
+
+/* =========================
+   صبر الزبون
+========================= */
+
+function decreasePatience(){
+
+ if(!orders.length)return;
 
  orders.forEach(o=>{
 
-  if(o.state==="new"){
+  o.left--;
 
-   if(canCook(o.need)){
+  if(o.left<=0){
 
-    useIngredients(o.need);
+   o.angry=true;
 
-    o.state="cooking";
-    o.progress=0;
+   let c=$("c"+(o.slot+1));
 
-    say("🔥 بدأ تجهيز "+o.name);
-
-   }else{
-
-    o.state="waiting_stock";
+   if(c){
+    c.style.transform="scale(1.15)";
    }
+
   }
 
-  if(o.state==="waiting_stock"){
+  if(o.left<-8){
 
-   if(canCook(o.need)){
+   removeOrder(o,false);
 
-    useIngredients(o.need);
-
-    o.state="cooking";
-    o.progress=0;
-
-   }
   }
 
-  if(o.state==="cooking"){
-
-   o.progress+=dt*(1+level*.08+workers.length*.04);
-
-   if(o.progress>=o.time){
-
-    o.progress=o.time;
-    o.state="ready";
-
-    dishes.push({
-     order:o,
-     x:850,
-     y:300,
-     done:false
-    });
-
-    say("🍽️ الطبق جاهز: "+o.name);
-
-    beep(700,.1);
-    beep(900,.15);
-   }
-  }
  });
+
+ render();
+
 }
 
 
 /* =========================
- الأطباق
-========================= */
-
-function updateDishes(dt){
-
- dishes.forEach(d=>{
-
-  if(d.done)return;
-
-  const c=d.order.customer;
-
-  if(!c)return;
-
-  d.x+=(c.x-d.x)*dt*.9;
-  d.y+=(c.y-d.y)*dt*.9;
-
-  if(Math.hypot(d.x-c.x,d.y-c.y)<40){
-
-   d.done=true;
-
-   d.order.state="served";
-   c.state="eating";
-   c.eat=4;
-
-   score+=30;
-   xp+=25;
-
-   say("🍽️ تم تقديم الطلب للزبون!");
-
-   beep(660,.1);
-   beep(880,.15);
-
-   setTimeout(()=>{
-
-    orders=orders.filter(x=>x!==d.order);
-    dishes=dishes.filter(x=>x!==d);
-
-   },300);
-  }
- });
-}
-
-
-/* =========================
- العمال
-========================= */
-
-function hire(){
-
- const cost=120+workers.length*70;
-
- if(money<cost){
-
-  say("💸 تحتاج "+cost+" جنيه.");
-
-  return;
- }
-
- money-=cost;
-
- const w={
-  id:workers.length+1,
-  x:900,
-  y:350,
-  tx:500+Math.random()*500,
-  ty:130+Math.random()*400,
-  speed:25
- };
-
- workers.push(w);
-
- const el=document.createElement("div");
-
- el.id="worker_"+w.id;
- el.className="character";
-
- el.innerHTML=`
-  <div class="charBody">👷</div>
-  <div class="tag">عامل ${w.id}</div>
- `;
-
- document.getElementById("characters").appendChild(el);
-
- say("👷 تم توظيف عامل جديد.");
-}
-
-function updateWorkers(dt){
-
- workers.forEach(w=>{
-
-  if(toward(w,w.tx,w.ty,dt)){
-
-   w.tx=400+Math.random()*650;
-   w.ty=120+Math.random()*430;
-  }
-
-  const el=document.getElementById("worker_"+w.id);
-
-  if(el){
-   el.style.left=w.x+"px";
-   el.style.top=w.y+"px";
-  }
- });
-}
-
-
-/* =========================
- المتجر
-========================= */
-
-function store(){
-
- modal(`
-  <h2>🏪 متجر المطعم</h2>
-
-  <p>رصيدك: <b class="money">${money} جنيه</b></p>
-
-  ${shop("meat","🥩 لحم",12)}
-  ${shop("bread","🍞 خبز",5)}
-  ${shop("cheese","🧀 جبن",7)}
-  ${shop("tomato","🍅 طماطم",4)}
-  ${shop("drink","🥤 مشروب",5)}
-
-  <br>
-  <button onclick="closeModal()">إغلاق</button>
- `);
-}
-
-function shop(k,name,price){
-
- return `
- <div class="card">
-  <b>${name}</b>
-  <p>المخزون: ${inventory[k]}</p>
-  <p class="money">${price} جنيه للواحدة</p>
-  <button class="primary"
-   onclick="buy('${k}',${price})">
-   شراء
-  </button>
-  <button
-   onclick="buy('${k}',${price},5)">
-   ×5
-  </button>
- </div>
- `;
-}
-
-function buy(k,price,count=1){
-
- const total=price*count;
-
- if(money<total){
-
-  say("💸 فلوسك لا تكفي.");
-
-  return;
- }
-
- money-=total;
- inventory[k]+=count;
-
- beep(500,.07);
-
- store();
-}
-
-
-/* =========================
- القائمة
-========================= */
-
-function menu(){
-
- modal(`
-  <h2>🍽️ قائمة الطعام</h2>
-
-  <div class="grid">
-   ${menuCard("burger")}
-   ${menuCard("cheese")}
-   ${menuCard("pizza")}
-   ${menuCard("drink")}
-  </div>
-
-  <br>
-  <button onclick="closeModal()">إغلاق</button>
- `);
-}
-
-function menuCard(k){
-
- const r=recipes[k];
-
- return `
- <div class="card">
-  <b>${r.name}</b>
-  <p>💰 ${r.price} جنيه</p>
-  <p>🔥 ${r.time} ثواني</p>
- </div>
- `;
-}
-
-
-/* =========================
- التطوير
-========================= */
-
-function upgrade(){
-
- const cost=250+level*150;
-
- modal(`
-  <h2>⬆️ تطوير المطعم</h2>
-
-  <p>المستوى الحالي: <b>${level}</b></p>
-
-  <p class="money">التكلفة: ${cost} جنيه</p>
-
-  <p>
-   التطوير يزيد سرعة الحركة والطبخ
-   ويحسن أرباح المطعم.
-  </p>
-
-  <button class="primary"
-   onclick="doUpgrade(${cost})">
-   ⬆️ تطوير
-  </button>
-
-  <button onclick="closeModal()">إلغاء</button>
- `);
-}
-
-function doUpgrade(cost){
-
- if(money<cost){
-
-  say("💸 لا يوجد مال كافٍ.");
-
-  closeModal();
-
-  return;
- }
-
- money-=cost;
- level++;
-
- player.speed+=1;
- reputation=Math.min(100,reputation+5);
-
- say("🎉 تم تطوير المطعم إلى المستوى "+level);
-
- beep(523,.1);
- beep(659,.1);
- beep(784,.2);
-
- closeModal();
-}
-
-
-/* =========================
- القواعد
-========================= */
-
-function rules(){
-
- modal(`
-  <h2>📖 قواعد مطعمي</h2>
-
-  <ol>
-   <li>👥 الزبائن يدخلون ويطلبون الطعام.</li>
-   <li>📋 الطلبات تظهر في القائمة.</li>
-   <li>🔥 إذا كانت المكونات موجودة يبدأ الطبخ.</li>
-   <li>🍽️ الطبق ينتقل إلى الزبون.</li>
-   <li>😋 الزبون يأكل ثم يذهب للكاشير.</li>
-   <li>💰 تحصل على المال بعد الدفع.</li>
-   <li>🏪 اشترِ المكونات من المتجر.</li>
-   <li>👷 وظّف العمال.</li>
-   <li>⬆️ طوّر المطعم لزيادة السرعة.</li>
-   <li>⭐ حافظ على سمعة المطعم.</li>
-  </ol>
-
-  <button onclick="closeModal()">حسنًا</button>
- `);
-}
-
-
-/* =========================
- الإيقاف
-========================= */
-
-function pauseGame(){
-
- if(!running)return;
-
- paused=!paused;
-
- document.getElementById("pause").textContent=
-  paused?"▶️":"⏸️";
-
- say(paused?"⏸️ اللعبة متوقفة":"▶️ اللعبة مستمرة");
-}
-
-
-/* =========================
- العرض
+   عرض الطلبات
 ========================= */
 
 function render(){
 
- document.getElementById("money").textContent=Math.round(money);
- document.getElementById("bank").textContent=Math.round(bank);
- document.getElementById("rep").textContent=Math.round(reputation);
- document.getElementById("score").textContent=Math.round(score);
- document.getElementById("served").textContent=served;
- document.getElementById("level").textContent=level;
+ let box=$("orders");
 
- const p=document.getElementById("player");
-
- p.style.left=player.x+"px";
- p.style.top=player.y+"px";
-
- renderOrders();
- renderInventory();
- renderMissions();
-
- customers.forEach(c=>{
-
-  const el=document.getElementById("customer_"+c.id);
-
-  if(!el)return;
-
-  el.style.left=c.x+"px";
-  el.style.top=c.y+"px";
-
-  let bubble=el.querySelector(".bubble");
-
-  if(c.order&&c.state==="waiting"){
-
-   if(!bubble){
-
-    bubble=document.createElement("div");
-    bubble.className="bubble";
-    el.appendChild(bubble);
-   }
-
-   bubble.textContent=c.order.name;
-  }else if(bubble){
-
-   bubble.remove();
-  }
- });
-
- dishes.forEach(d=>{
-
-  let el=document.getElementById("dish_"+d.order.id);
-
-  if(!el){
-
-   el=document.createElement("div");
-   el.id="dish_"+d.order.id;
-   el.style.position="absolute";
-   el.style.zIndex="16";
-   el.style.fontSize="29px";
-   el.textContent="🍽️";
-
-   document.getElementById("characters").appendChild(el);
-  }
-
-  el.style.left=d.x+"px";
-  el.style.top=d.y+"px";
-
-  if(d.done)el.remove();
- });
-}
-
-function renderOrders(){
-
- const box=document.getElementById("orders");
+ box.innerHTML="";
 
  if(!orders.length){
 
   box.innerHTML=
-   `<div class="card">لا توجد طلبات حاليًا.</div>`;
+   '<div style="margin:auto;color:#ddd">'+
+   'لا يوجد طلبات حاليًا 🍽️</div>';
 
+  return;
+
+ }
+
+ orders.forEach(o=>{
+
+  let d=document.createElement("div");
+
+  d.className=
+   "order"+
+   (o.angry?" angry":"")+
+   (current===o?" selected":"");
+
+  let percent=
+   Math.max(
+    0,
+    Math.min(
+     100,
+     o.left/o.max*100
+    )
+   );
+
+  d.innerHTML=
+   '<div class="customer">'+
+   o.customer+
+   '</div>'+
+   '<h3>طلب #'+o.id+'</h3>'+
+   o.item.icon+" "+o.item.name+
+   '<br>💰 '+price(o)+'ج'+
+   '<div class="timer">'+
+   '<i style="width:'+percent+'%"></i>'+
+   '</div>';
+
+  d.onclick=()=>{
+   selectOrder(o.id);
+  };
+
+  box.appendChild(d);
+
+ });
+
+}
+
+
+/* =========================
+   اختيار الطلب
+========================= */
+
+function selectOrder(id){
+
+ if(paused){
+  msg("⏸️ المطعم متوقف");
   return;
  }
 
- box.innerHTML=orders.map(o=>{
+ if(locked){
+  msg("🔒 افتح القفل أولًا");
+  return;
+ }
 
-  let state="⏳ انتظار";
+ if(cooking){
+  msg("🔥 العامل مشغول");
+  return;
+ }
 
-  if(o.state==="cooking")
-   state="🔥 طبخ";
+ current=orders.find(o=>o.id===id);
 
-  if(o.state==="ready")
-   state="🍽️ جاهز";
+ if(!current)return;
 
-  if(o.state==="waiting_stock")
-   state="⚠️ ناقص مكونات";
+ $("status").textContent=
+  "👨‍🍳 اختر الطبق المطلوب من الأزرار.";
 
-  const pct=o.state==="cooking"
-   ?Math.round(o.progress/o.time*100)
-   :o.state==="ready"?100:0;
+ workerMoveToNextStation();
 
-  return `
-   <div class="card">
-    <b>${o.name}</b>
-    <p>💰 ${o.price} جنيه</p>
-    <p>${state}</p>
-    <div class="progress">
-     <i style="width:${pct}%"></i>
-    </div>
-   </div>
-  `;
+ render();
 
- }).join("");
-}
+ beep(700,.1);
 
-function renderInventory(){
-
- const names={
-  meat:"🥩 لحم",
-  bread:"🍞 خبز",
-  cheese:"🧀 جبن",
-  tomato:"🍅 طماطم",
-  drink:"🥤 مشروب"
- };
-
- document.getElementById("inventory").innerHTML=
- Object.keys(inventory).map(k=>`
-  <div class="card">
-   ${names[k]}:
-   <b>${inventory[k]}</b>
-  </div>
- `).join("");
-}
-
-function renderMissions(){
-
- const target=5+level*3;
-
- document.getElementById("missions").innerHTML=`
-  <p>🎯 خدمة الزبائن:
-   <b>${served}/${target}</b>
-  </p>
-
-  <div class="progress">
-   <i style="width:${Math.min(100,served/target*100)}%"></i>
-  </div>
-
-  <p>👷 العمال: <b>${workers.length}</b></p>
-  <p>⭐ السمعة: <b>${Math.round(reputation)}/100</b></p>
-  <p>📈 المستوى: <b>${level}</b></p>
- `;
 }
 
 
 /* =========================
- النوافذ والرسائل
+   معرفة المحطة
 ========================= */
 
-function say(text){
- document.getElementById("message").textContent=text;
+function stationFor(type){
+
+ if(type==="burger"){
+  return $("grill");
+ }
+
+ if(type==="fries"){
+  return $("fryer");
+ }
+
+ return $("drink");
+
 }
-
-function modal(html){
-
- document.getElementById("modalBox").innerHTML=html;
- document.getElementById("modal").classList.remove("hidden");
-}
-
-function closeModal(){
-
- document.getElementById("modal").classList.add("hidden");
-}
-
-document.getElementById("modal").addEventListener("click",e=>{
- if(e.target===document.getElementById("modal"))
-  closeModal();
-});
 
 
 /* =========================
- اللمس بالسحب
+   العامل المتاح
 ========================= */
 
-let touch=null;
+function getWorker(){
 
-document.getElementById("restaurant").addEventListener(
- "touchstart",
+ if(!busyWorkers.chef1){
+
+  return $("chef1");
+
+ }
+
+ if(level>=3){
+
+  $("chef2").style.display="block";
+
+  if(!busyWorkers.chef2){
+
+   return $("chef2");
+
+  }
+
+ }
+
+ return null;
+
+}
+
+
+/* =========================
+   سرعة العامل
+========================= */
+
+function workerSpeed(){
+
+ return 160+
+  (speedLevel-1)*60+
+  (level-1)*25;
+
+}
+
+
+/* =========================
+   حركة العامل
+========================= */
+
+function moveElementTo(el,x,y){
+
+ return new Promise(resolve=>{
+
+  let oldX=el.offsetLeft;
+  let oldY=el.offsetTop;
+
+  let distance=Math.hypot(
+   x-oldX,
+   y-oldY
+  );
+
+  let seconds=Math.max(
+   .35,
+   distance/workerSpeed()
+  );
+
+  el.style.transition=
+   "left "+seconds+"s linear,top "+seconds+"s linear";
+
+  el.style.left=x+"px";
+  el.style.top=y+"px";
+
+  setTimeout(
+   resolve,
+   seconds*1000+40
+  );
+
+ });
+
+}
+
+
+/* =========================
+   تحريك العامل للمحطة التالية
+========================= */
+
+function workerMoveToNextStation(){
+
+ if(!current)return;
+
+ let type=
+  current.item.steps[current.step];
+
+ let station=
+  stationFor(type);
+
+ if(!station)return;
+
+ let worker=getWorker();
+
+ if(!worker){
+
+  msg("👨‍🍳 كل العاملين مشغولون");
+
+  return;
+
+ }
+
+ let x=station.offsetLeft+10;
+ let y=station.offsetTop-75;
+
+ moveElementTo(
+  worker,
+  x,
+  y
+ );
+
+}
+
+
+/* =========================
+   الأزرار اليدوية
+========================= */
+
+function manualCook(type){
+
+ if(!started){
+  msg("▶️ ابدأ المطعم أولًا");
+  return;
+ }
+
+ if(paused){
+  msg("⏸️ المطعم متوقف");
+  return;
+ }
+
+ if(locked){
+  msg("🔒 افتح القفل");
+  return;
+ }
+
+ if(!current){
+
+  msg("📋 اختر طلبًا أولًا");
+  return;
+
+ }
+
+ cook(type);
+
+}
+
+
+/* =========================
+   الطبخ
+========================= */
+
+async function cook(type){
+
+ if(!current)return;
+
+ if(cooking)return;
+
+ let wanted=
+  current.item.steps[current.step];
+
+ if(type!==wanted){
+
+  msg("❌ هذا ليس المطلوب الآن");
+
+  beep(180,.15);
+
+  return;
+
+ }
+
+ let worker=getWorker();
+
+ if(!worker){
+
+  msg("👨‍🍳 العاملان مشغولان");
+
+  return;
+
+ }
+
+ let workerId=
+  worker.id==="chef1"
+  ?"chef1"
+  :"chef2";
+
+ busyWorkers[workerId]=true;
+ cooking=true;
+
+ let station=
+  stationFor(type);
+
+ let x=station.offsetLeft+10;
+ let y=station.offsetTop-75;
+
+ await moveElementTo(
+  worker,
+  x,
+  y
+ );
+
+ if(paused){
+
+  busyWorkers[workerId]=false;
+  cooking=false;
+  return;
+
+ }
+
+ worker.style.transform="scale(1.15)";
+
+ $("status").textContent=
+  "🔥 جاري تجهيز "+current.item.icon;
+
+ let base={
+  burger:4,
+  fries:2.5,
+  drink:1.5
+ }[type];
+
+ let seconds=Math.max(
+  .6,
+  base-
+  (cookLevel-1)*.55-
+  (speedLevel-1)*.12-
+  (level-1)*.05
+ );
+
+ await wait(seconds);
+
+ worker.style.transform="scale(1)";
+
+ if(!current){
+
+  busyWorkers[workerId]=false;
+  cooking=false;
+  return;
+
+ }
+
+ current.step++;
+
+ beep(850,.12);
+
+ if(
+  current.step>=
+  current.item.steps.length
+ ){
+
+  await deliver(current,worker);
+
+ }else{
+
+  $("status").textContent=
+   "✅ تم تجهيز جزء من الطلب. أكمل الطلب.";
+
+  busyWorkers[workerId]=false;
+  cooking=false;
+
+  workerMoveToNextStation();
+
+ }
+
+}
+
+
+/* =========================
+   انتظار
+========================= */
+
+function wait(seconds){
+
+ return new Promise(resolve=>{
+
+  let passed=0;
+
+  let t=setInterval(()=>{
+
+   if(!paused){
+
+    passed+=.1;
+
+   }
+
+   if(passed>=seconds){
+
+    clearInterval(t);
+    resolve();
+
+   }
+
+  },100);
+
+ });
+
+}
+
+
+/* =========================
+   تسليم الطلب
+========================= */
+
+async function deliver(o,worker){
+
+ if(!o||!worker)return;
+
+ let table=$(
+  "table"+(o.slot+1)
+ );
+
+ if(!table)return;
+
+ $("status").textContent=
+  "🍽️ العامل يسلّم الطلب للزبون.";
+
+ await moveElementTo(
+  worker,
+  table.offsetLeft+20,
+  table.offsetTop-65
+ );
+
+ let dish=$("dish");
+
+ dish.style.display="block";
+
+ dish.style.left=
+  (worker.offsetLeft+25)+"px";
+
+ dish.style.top=
+  (worker.offsetTop+20)+"px";
+
+ setTimeout(()=>{
+
+  dish.style.left=
+   (table.offsetLeft+35)+"px";
+
+  dish.style.top=
+   (table.offsetTop+10)+"px";
+
+ },100);
+
+ await wait(.9);
+
+ dish.style.display="none";
+
+ await cashier(o,worker);
+
+}
+
+
+/* =========================
+   الكاشير
+========================= */
+
+async function cashier(o,worker){
+
+ if(!o)return;
+
+ $("status").textContent=
+  "💰 العامل يتجه إلى الكاشير.";
+
+ let cash=$("cash");
+
+ await moveElementTo(
+  worker,
+  cash.offsetLeft+15,
+  cash.offsetTop-75
+ );
+
+ await wait(.45);
+
+ let earn=price(o);
+
+ money+=earn;
+
+ stars+=2;
+
+ served++;
+
+ beep(1050,.15);
+ beep(1250,.12);
+
+ $("status").textContent=
+  "💰 تم استلام "+earn+"ج من الزبون!";
+
+ let c=$("c"+(o.slot+1));
+
+ if(c){
+
+  c.style.transform="scale(1.2)";
+
+  setTimeout(()=>{
+
+   c.style.transition=
+    "left .7s linear,top .7s linear";
+
+   c.style.left="1080px";
+   c.style.top="80px";
+
+  },150);
+
+ }
+
+ removeOrder(o,true);
+
+ levelCheck();
+
+ ui();
+
+}
+
+
+/* =========================
+   حذف الطلب
+========================= */
+
+function removeOrder(o,success){
+
+ let i=orders.indexOf(o);
+
+ if(i>=0){
+
+  orders.splice(i,1);
+
+ }
+
+ if(current===o){
+
+  current=null;
+
+ }
+
+ if(!success){
+
+  $("status").textContent=
+   "😡 زبون غادر لأنه انتظر طويلًا.";
+
+  beep(180,.2);
+
+ }
+
+ render();
+
+}
+
+
+/* =========================
+   تطور المستوى
+========================= */
+
+function levelCheck(){
+
+ let newLevel=
+  Math.floor(served/5)+1;
+
+ if(newLevel>level){
+
+  level=newLevel;
+
+  stars+=5;
+
+  if(level>=3){
+
+   $("chef2").style.display="block";
+
+  }
+
+  msg("🎉 وصلت إلى المستوى "+level);
+
+  $("status").textContent=
+   "⭐ مستوى جديد! المطعم أصبح أسرع.";
+
+  beep(700,.12);
+  beep(950,.12);
+
+ }
+
+ ui();
+
+}
+
+
+/* =========================
+   المتجر
+========================= */
+
+function openShop(){
+
+ if(paused){
+  msg("⏸️ أغلق المتجر بعد تشغيل المطعم");
+ }
+
+ $("shop").style.display="flex";
+
+}
+
+function closeShop(){
+
+ $("shop").style.display="none";
+
+}
+
+
+/* =========================
+   التطوير
+========================= */
+
+function upgrade(type){
+
+ let cost={
+  speed:100*speedLevel,
+  cook:120*cookLevel,
+  capacity:150*capacityLevel,
+  patience:120*patienceLevel
+ }[type];
+
+ if(money<cost){
+
+  msg("💰 المال غير كافٍ");
+
+  return;
+
+ }
+
+ money-=cost;
+
+ if(type==="speed"){
+
+  speedLevel++;
+
+  msg("⚡ تم تطوير سرعة العاملين");
+
+ }
+
+ if(type==="cook"){
+
+  cookLevel++;
+
+  msg("🔥 تم تطوير سرعة الطبخ");
+
+ }
+
+ if(type==="capacity"){
+
+  capacityLevel++;
+
+  if(capacityLevel>=3){
+   $("chef2").style.display="block";
+  }
+
+  msg("👥 زادت سعة المطعم");
+
+ }
+
+ if(type==="patience"){
+
+  patienceLevel++;
+
+  msg("❤️ زاد صبر الزبائن");
+
+ }
+
+ ui();
+
+ beep(850,.15);
+
+}
+
+
+/* =========================
+   إيقاف / تشغيل
+========================= */
+
+function togglePause(){
+
+ if(!started)return;
+
+ paused=!paused;
+
+ let b=$("pauseBtn");
+
+ if(paused){
+
+  b.textContent="▶️ تشغيل";
+
+  $("status").textContent=
+   "⏸️ المطعم متوقف مؤقتًا.";
+
+ }else{
+
+  b.textContent="⏸️ إيقاف";
+
+  $("status").textContent=
+   "▶️ المطعم يعمل.";
+
+ }
+
+ beep(paused?300:700,.1);
+
+}
+
+
+/* =========================
+   الصوت
+========================= */
+
+function toggleSound(){
+
+ soundOn=!soundOn;
+
+ $("soundBtn").textContent=
+  soundOn?"🔊 صوت":"🔇 صامت";
+
+ if(soundOn)beep(700,.1);
+
+}
+
+
+/* =========================
+   القفل
+========================= */
+
+function lockGame(){
+
+ locked=!locked;
+
+ $("lockBtn").textContent=
+  locked?"🔒 فتح":"🔓 قفل";
+
+ msg(
+  locked?
+  "🔒 تم قفل التحكم":
+  "🔓 تم فتح التحكم"
+ );
+
+}
+
+
+/* =========================
+   إنهاء اليوم
+========================= */
+
+function endDay(){
+
+ if(!started)return;
+
+ started=false;
+
+ clearInterval(timer);
+ clearInterval(spawnTimer);
+ clearInterval(patienceTimer);
+
+ $("result").innerHTML=
+  "<p>🍽️ الطلبات المقدمة: <b>"+
+  served+
+  "</b></p>"+
+  "<p>💰 الرصيد: <b>"+
+  Math.floor(money)+
+  "ج</b></p>"+
+  "<p>⭐ النجوم: <b>"+
+  Math.floor(stars)+
+  "</b></p>"+
+  "<p>🏆 المستوى: <b>"+
+  level+
+  "</b></p>";
+
+ $("end").style.display="flex";
+
+ beep(523,.2);
+
+ setTimeout(()=>{
+  beep(659,.2);
+ },220);
+
+ setTimeout(()=>{
+  beep(784,.3);
+ },440);
+
+}
+
+
+/* =========================
+   تحريك المطعم بالإصبع
+========================= */
+
+view.addEventListener(
+ "pointerdown",
  e=>{
-  const t=e.touches[0];
-  touch={x:t.clientX,y:t.clientY};
+
+  if(locked)return;
+
+  if(e.pointerType==="touch"){
+
+   dragging=true;
+
+   sx=e.clientX;
+   sy=e.clientY;
+
+   wx=parseFloat(
+    world.dataset.x||0
+   );
+
+   wy=parseFloat(
+    world.dataset.y||0
+   );
+
+  }
+
  },
  {passive:true}
 );
 
-document.getElementById("restaurant").addEventListener(
+
+view.addEventListener(
+ "pointermove",
+ e=>{
+
+  if(locked||!dragging)return;
+
+  let dx=e.clientX-sx;
+  let dy=e.clientY-sy;
+
+  let x=wx+dx;
+  let y=wy+dy;
+
+  world.dataset.x=x;
+  world.dataset.y=y;
+
+  world.style.transform=
+   "translate(calc(-50% + "+
+   x+
+   "px),calc(-50% + "+
+   y+
+   "px)) scale("+
+   zoom+
+   ")";
+
+ },
+ {passive:true}
+);
+
+
+view.addEventListener(
+ "pointerup",
+ ()=>{
+  dragging=false;
+ }
+);
+
+
+view.addEventListener(
+ "pointercancel",
+ ()=>{
+  dragging=false;
+ }
+);
+
+
+/* =========================
+   التكبير بإصبعين
+========================= */
+
+view.addEventListener(
+ "touchstart",
+ e=>{
+
+  if(e.touches.length===2){
+
+   pinch=true;
+   dragging=false;
+
+   lastDist=
+    dist(
+     e.touches[0],
+     e.touches[1]
+    );
+
+  }
+
+ },
+ {passive:false}
+);
+
+
+view.addEventListener(
+ "touchmove",
+ e=>{
+
+  if(
+   !pinch||
+   e.touches.length!==2||
+   locked
+  )return;
+
+  e.preventDefault();
+
+  let d=
+   dist(
+    e.touches[0],
+    e.touches[1]
+   );
+
+  if(lastDist>0){
+
+   zoom*=d/lastDist;
+
+  }
+
+  zoom=Math.max(
+   .65,
+   Math.min(1.5,zoom)
+  );
+
+  lastDist=d;
+
+  let x=parseFloat(
+   world.dataset.x||0
+  );
+
+  let y=parseFloat(
+   world.dataset.y||0
+  );
+
+  world.style.transform=
+   "translate(calc(-50% + "+
+   x+
+   "px),calc(-50% + "+
+   y+
+   "px)) scale("+
+   zoom+
+   ")";
+
+ },
+ {passive:false}
+);
+
+
+view.addEventListener(
  "touchend",
  e=>{
 
-  if(!touch)return;
+  if(e.touches.length<2){
 
-  const t=e.changedTouches[0];
+   pinch=false;
 
-  const dx=t.clientX-touch.x;
-  const dy=t.clientY-touch.y;
-
-  if(Math.max(Math.abs(dx),Math.abs(dy))>25){
-
-   if(Math.abs(dx)>Math.abs(dy))
-    move(dx>0?1:-1,0);
-   else
-    move(0,dy>0?1:-1);
   }
 
-  touch=null;
  },
  {passive:true}
 );
 
 
+function dist(a,b){
+
+ return Math.hypot(
+  a.clientX-b.clientX,
+  a.clientY-b.clientY
+ );
+
+}
+
+
 /* =========================
- تشغيل أولي
+   تشغيل أولي
 ========================= */
 
+ui();
 render();
 
 </script>
+
 </body>
 </html>

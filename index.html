@@ -565,8 +565,18 @@ button{
  .stationIcon{font-size:24px}  
  #chef{font-size:40px}  
 }  
+/* STAGE SELECT */
+#stageMenu{min-height:100vh;padding:18px 12px 28px;background:radial-gradient(circle at 50% 0,#8b4513,#24140d 58%,#080808);color:#fff}
+.stageShell{max-width:900px;margin:auto;background:rgba(0,0,0,.72);border:1px solid #75451f;border-radius:22px;padding:16px;box-shadow:0 12px 35px #0008}
+.stageHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.stageHead h2{margin:4px 0 10px;font-size:25px}
+.stageRange{text-align:center;color:#ffe0a3;margin:10px 0 14px}.stageGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.restaurantStageCard{min-height:112px;border:1px solid #8d5b27;border-radius:15px;padding:10px 6px;background:linear-gradient(145deg,#563015,#21140c);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.restaurantStageCard strong{font-size:18px;color:#ffd37b}.restaurantStageCard small{font-size:12px;color:#eee}.restaurantStageCard.locked{filter:grayscale(.75);opacity:.58;background:#292929}
+.stagePager{display:flex;justify-content:center;align-items:center;gap:12px;margin:16px 0 8px;flex-wrap:wrap}.stagePager button,.stageHead button,.stageExitHome{background:#f39c12;color:#17100a}.stageExitHome{width:100%;margin-top:10px}
+.stageX{background:#c0392b!important;color:white!important;padding:8px 13px!important}
+@media(max-width:480px){.stageGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.restaurantStageCard{min-height:100px;padding:7px 3px}.restaurantStageCard strong{font-size:16px}.restaurantStageCard small{font-size:11px}.stageShell{padding:10px}}
 </style>  </head>  <body>  <!-- ================= HOME ================= -->  <section id="home">  
- <div class="homebox">    <div class="biglogo">🍳👨‍🍳🍔</div>    <h1>مطعمي</h1>    <p>🍽️ لعبة إدارة مطعم ومطبخ متحرك</p>  <button onclick="startGame()">▶️ بداية اللعبة</button>
+ <div class="homebox">    <div class="biglogo">🍳👨‍🍳🍔</div>    <h1>مطعمي</h1>    <p>🍽️ لعبة إدارة مطعم ومطبخ متحرك</p>  <button onclick="showStages()">▶️ بداية اللعبة</button>
 
 <button class="blue" onclick="showRules()">📜 قواعد اللعبة</button>
 
@@ -576,7 +586,13 @@ button{
    🔊 الموسيقى:  
    <span id="homeMusic">تشغيل</span>  
   </button>   </div>  
-</section>  <!-- ================= GAME ================= -->  <section id="game" class="hidden">   <div class="topbar">    <div class="stat">💰 <span id="money">100</span></div>  
+</section>
+<section id="stageMenu" class="hidden"><div class="stageShell">
+<div class="stageHead"><h2>🏆 اختر مرحلة المطعم</h2><button class="stageX" onclick="goHome()">✕ خروج</button></div>
+<p>كلما تقدمت في المراحل زادت سرعة الزبائن وصعوبة الإدارة.</p><div id="stageRange" class="stageRange">المراحل 1–12</div><div id="stageGrid" class="stageGrid"></div>
+<div class="stagePager"><button id="stagePrev" onclick="changeStagePage(-1)">⬅️ السابق</button><span id="stagePageLabel">صفحة 1</span><button id="stageNext" onclick="changeStagePage(1)">التالي ➡️</button></div>
+<button class="stageExitHome" onclick="goHome()">🏠 الرجوع للشاشة الرئيسية</button></div></section>
+<!-- ================= GAME ================= -->  <section id="game" class="hidden">   <div class="topbar">    <div class="stat">💰 <span id="money">100</span></div>  
   <div class="stat">⭐ <span id="stars">0</span></div>  
   <div class="stat">🏆 مستوى <span id="level">1</span></div>  
   <div class="stat">🧾 طلبات <span id="ordersCount">0</span></div>  
@@ -587,7 +603,7 @@ button{
 <button onclick="pauseGame()">⏸️</button>
 <button onclick="toggleRestaurant()">🔓 <span id="lockText">مفتوح</span></button>
 <button onclick="showRules()">📜</button>
-<button onclick="finishGame()">🏁</button>
+<button onclick="finishGame()">🏁</button><button class="stageX" onclick="exitToStages()" title="الرجوع للمراحل">✕ المراحل</button>
 
  </div>   <div id="restaurant">    <div class="wall top"></div>  
   <div class="wall bottom"></div>    <!-- الصالة -->    <div class="dining">     <h2 class="diningTitle">🍽️ صالة المطعم</h2>     <div class="floorText">  
@@ -670,7 +686,17 @@ button{
     <i id="progress"></i>  
    </div>    </div>   </div>  </section>  <!-- ================= MODAL ================= -->  <div id="modal" class="modal hidden">  
  <div class="modalbox" id="modalBox"></div>  
-</div>  <script>  
+</div>  <script>
+let currentStageNumber=1,unlockedStageNumber=1,stagePageNumber=0;
+try{currentStageNumber=Math.max(1,Number(localStorage.getItem("matamy_current_stage"))||1);unlockedStageNumber=Math.max(1,Number(localStorage.getItem("matamy_unlocked_stage"))||1);}catch(e){}
+function getRestaurantStageName(n){const names=["البداية","مطعم الحي","المطعم الشعبي","مطعم العائلة","المطعم الفاخر","سلسلة المطاعم","إمبراطورية الطعام"];return n<=names.length?names[n-1]:"إمبراطورية الطعام "+n;}
+function showStages(){running=false;paused=false;clearAllTimers();stopMusic();document.getElementById("home").classList.add("hidden");document.getElementById("game").classList.add("hidden");document.getElementById("stageMenu").classList.remove("hidden");renderRestaurantStages();}
+function renderRestaurantStages(){const grid=document.getElementById("stageGrid"),first=stagePageNumber*12+1,last=first+11;document.getElementById("stageRange").textContent="المراحل "+first+"–"+last;document.getElementById("stagePageLabel").textContent="صفحة "+(stagePageNumber+1);document.getElementById("stagePrev").disabled=stagePageNumber===0;grid.innerHTML="";for(let n=first;n<=last;n++){const unlocked=n<=unlockedStageNumber,card=document.createElement("button");card.className="restaurantStageCard"+(unlocked?"":" locked");card.innerHTML="<strong>"+(unlocked?"OPEN":"🔒")+" · "+n+"</strong><span>"+(n===1?"🍳 بداية المطعم":n<5?"🍔 مطعم نامٍ":n<13?"⭐ تحدٍ متقدم":"👑 تحدٍ احترافي")+"</span><small>"+(unlocked?"ابدأ المرحلة":"أكمل المرحلة السابقة")+"</small>";card.disabled=!unlocked;card.onclick=()=>openRestaurantStage(n);grid.appendChild(card);}}
+function changeStagePage(delta){stagePageNumber=Math.max(0,stagePageNumber+delta);renderRestaurantStages();}
+function openRestaurantStage(n){if(n>unlockedStageNumber)return;currentStageNumber=n;try{localStorage.setItem("matamy_current_stage",String(n));}catch(e){}document.getElementById("stageMenu").classList.add("hidden");startGame();}
+function exitToStages(){running=false;paused=false;clearAllTimers();stopMusic();document.querySelectorAll(".customer").forEach(x=>x.remove());closeModal();document.getElementById("game").classList.add("hidden");document.getElementById("stageMenu").classList.remove("hidden");renderRestaurantStages();}
+function unlockNextRestaurantStage(){if(currentStageNumber>=unlockedStageNumber){unlockedStageNumber=currentStageNumber+1;try{localStorage.setItem("matamy_unlocked_stage",String(unlockedStageNumber));}catch(e){}}}
+  
   
 /* =====================================================  
    بيانات اللعبة  
@@ -912,7 +938,7 @@ function startGame(){
   
  money=100;  
  stars=0;  
- level=1;  
+ level=currentStageNumber;
  served=0;  
  totalOrders=0;  
  seconds=0;  
@@ -2201,8 +2227,10 @@ function finishGame(){
   financial.bonuses-  
   financial.expenses;  
   
- let stage=getStageInfo();  
-  
+ let stage=getStageInfo();
+ const stageName=getRestaurantStageName(currentStageNumber);
+ const stageGoal=Math.max(5,currentStageNumber*3);
+ if(served>=stageGoal)unlockNextRestaurantStage();
  sound(523,.15);  
   
  setTimeout(()=>sound(659,.15),150);  
@@ -2214,7 +2242,7 @@ function finishGame(){
   
   <div class="card">  
    🏆 المرحلة:  
-   <b>${stage.name}</b>  
+   <b>${stageName}</b>  
   </div>  
   
   <div class="card">  

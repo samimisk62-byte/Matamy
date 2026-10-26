@@ -979,14 +979,10 @@ function startGame(){
   
   if(!running||paused||!restaurantOpen)return;  
   
-  let maxCustomers=  
-   Math.min(10,3+Math.floor(level/2));  
-  
-  if(customers.length<maxCustomers){  
-   addCustomer();  
-  }  
-  
- },Math.max(2600,5000-level*120));  
+  let stageDifficulty=Math.max(0,currentStageNumber-1);
+  let maxCustomers=Math.min(10,3+Math.floor(stageDifficulty/2)+Math.floor(level/3));
+  if(customers.length<maxCustomers){ addCustomer(); }
+ },Math.max(1800,5000-(Math.max(0,currentStageNumber-1)*220)-(level*60)));  
   
  patienceTimer=setInterval(updatePatience,1000);  
   
@@ -1046,9 +1042,8 @@ function addCustomer(){
   
  if(!running||paused||!restaurantOpen)return;  
   
- let maxCustomers=  
-  Math.min(10,3+Math.floor(level/2));  
-  
+ let stageDifficulty=Math.max(0,currentStageNumber-1);
+ let maxCustomers=Math.min(10,3+Math.floor(stageDifficulty/2)+Math.floor(level/3));
  if(customers.length>=maxCustomers)return;  
   
  let id=Date.now()+Math.random();  
@@ -1247,11 +1242,8 @@ function updatePatience(){
   
   if(c.state!=="waiting")return;  
   
-  let loss=  
-   Math.max(  
-    .8,  
-    1.4-(upgrades.quality*.08)  
-   );  
+  let stageDifficulty=Math.max(0,currentStageNumber-1);
+  let loss=Math.max(.8,1.4+(stageDifficulty*.10)-(upgrades.quality*.08));  
   
   c.patience-=loss;  
   
@@ -1334,13 +1326,8 @@ function cook(food){
   chef.style.left="88%";  
  }  
   
- let duration=  
-  Math.max(  
-   1,  
-   foods[food].time-  
-   upgrades.speed-  
-   Math.floor(upgrades.kitchen/2)  
-  );  
+ let stageDifficulty=Math.max(0,currentStageNumber-1);
+ let duration=Math.max(1,foods[food].time+Math.floor(stageDifficulty/4)-upgrades.speed-Math.floor(upgrades.kitchen/2));  
   
  let progress=0;  
   

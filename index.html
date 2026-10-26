@@ -596,8 +596,7 @@ button{
   <div class="stat">⭐ <span id="stars">0</span></div>  
   <div class="stat">🏆 مستوى <span id="level">1</span></div>  
   <div class="stat">🧾 طلبات <span id="ordersCount">0</span></div>  
-  <div class="stat">👥 مخدوم <span id="served">0</span></div>  
-  <div class="stat">⏱️ <span id="clock">00:00</span></div>  <button onclick="toggleMusic()">🔊</button>
+  <div class="stat">👥 مخدوم <span id="served">0</span></div>  <div class="stat">🎯 الهدف <span id="stageGoal">5</span></div>  <div class="stat">⏱️ <span id="clock">00:00</span></div>  <button onclick="toggleMusic()">🔊</button>
 <button onclick="showFinance()">🏦</button>
 <button onclick="showShop()">🛒</button>
 <button onclick="pauseGame()">⏸️</button>
@@ -687,7 +686,7 @@ button{
    </div>    </div>   </div>  </section>  <!-- ================= MODAL ================= -->  <div id="modal" class="modal hidden">  
  <div class="modalbox" id="modalBox"></div>  
 </div>  <script>
-let currentStageNumber=1,unlockedStageNumber=1,stagePageNumber=0;
+let currentStageNumber=1,unlockedStageNumber=1,stagePageNumber=0,stageRewardClaimed=false;
 try{currentStageNumber=Math.max(1,Number(localStorage.getItem("matamy_current_stage"))||1);unlockedStageNumber=Math.max(1,Number(localStorage.getItem("matamy_unlocked_stage"))||1);}catch(e){}
 function getRestaurantStageName(n){const names=["البداية","مطعم الحي","المطعم الشعبي","مطعم العائلة","المطعم الفاخر","سلسلة المطاعم","إمبراطورية الطعام"];return n<=names.length?names[n-1]:"إمبراطورية الطعام "+n;}
 function showStages(){running=false;paused=false;clearAllTimers();stopMusic();document.getElementById("home").classList.add("hidden");document.getElementById("game").classList.add("hidden");document.getElementById("stageMenu").classList.remove("hidden");renderRestaurantStages();}
@@ -939,7 +938,8 @@ function startGame(){
  money=100;  
  stars=0;  
  level=currentStageNumber;
- served=0;  
+ served=0;
+ stageRewardClaimed=false;
  totalOrders=0;  
  seconds=0;  
   
@@ -1843,22 +1843,18 @@ function updateLevel(){
   updateUI();  
  }  
   
- let stage=getStageInfo();  
-  
- if(stage.target>0&&served===stage.target){  
-  
-  money+=stage.reward;  
-  stars+=20;  
-  financial.bonuses+=stage.reward;  
-  
-  message(  
-   "🏆 مرحلة جديدة: "+stage.name+  
-   " — مكافأة "+stage.reward+" جنيه"  
-  );  
-  
-  sound(1000,.18);  
-  updateUI();  
- }  
+ const stageGoal=Math.max(5,currentStageNumber*3);
+ if(!stageRewardClaimed&&served>=stageGoal){
+  stageRewardClaimed=true;
+  const stageReward=100+(currentStageNumber*50);
+  money+=stageReward;
+  stars+=20;
+  financial.bonuses+=stageReward;
+  unlockNextRestaurantStage();
+  message("🏆 أحسنت! أكملت هدف المرحلة "+currentStageNumber+" — مكافأة "+stageReward+" جنيه، والمرحلة التالية اتفتحت!");
+  sound(1000,.18);
+  updateUI();
+ }
 }  
   
   
@@ -2318,7 +2314,8 @@ function updateUI(){
  document.getElementById("money").textContent=money;  
  document.getElementById("stars").textContent=stars;  
  document.getElementById("level").textContent=level;  
- document.getElementById("served").textContent=served;  
+ document.getElementById("served").textContent=served;
+ document.getElementById("stageGoal").textContent=Math.max(5,currentStageNumber*3);
  document.getElementById("ordersCount").textContent=orders.length;  
   
  document.getElementById("storeSpeed").textContent=  

@@ -823,7 +823,9 @@ html body .skiptranslate iframe{visibility:hidden!important}
  <button class="foodButton" data-food="sandwich" onclick="cook('sandwich')">🥪 ساندويتش</button>  
  <button class="foodButton" data-food="sushi" onclick="cook('sushi')">🍣 سوشي</button>
  <button class="foodButton" data-food="shawarma" onclick="cook('shawarma')">🌯 شاورما</button>
- <button class="foodButton" data-food="fries" onclick="cook('fries')">🍟 بطاطس</button>  
+ <button class="foodButton" data-food="fries" onclick="cook('fries')">🍟 بطاطس</button>
+ <button class="foodButton" data-food="nuggets" onclick="cook('nuggets')">🍗 ناجتس</button>
+ <button class="foodButton" data-food="soup" onclick="cook('soup')">🍲 شوربة</button>  
 </div>  
 
 
@@ -834,6 +836,7 @@ html body .skiptranslate iframe{visibility:hidden!important}
  <button class="drinkButton" data-food="juice" onclick="cook('juice')">🧃 عصير</button>  
  <button class="drinkButton" data-food="coffee" onclick="cook('coffee')">☕ قهوة</button>
  <button class="drinkButton" data-food="tea" onclick="cook('tea')">🫖 شاي</button>
+ <button class="drinkButton" data-food="lemonade" onclick="cook('lemonade')">🍋 ليمونادة</button>
  <button class="drinkButton" data-food="milkshake" onclick="cook('milkshake')">🥤 ميلك شيك</button>
  <button class="foodButton" data-food="icecream" onclick="cook('icecream')">🍨 آيس كريم</button>  
  <button class="foodButton" data-food="dessert" onclick="cook('dessert')">🍰 حلوى</button>  
@@ -978,7 +981,10 @@ const foods={
  fries:{name:"🍟 بطاطس مقلية",price:22,time:3},
  icecream:{name:"🍨 آيس كريم",price:24,time:2},
  milkshake:{name:"🥤 ميلك شيك",price:30,time:3},
- tea:{name:"🫖 شاي",price:12,time:2}  
+ tea:{name:"🫖 شاي",price:12,time:2},
+ soup:{name:"🍲 شوربة",price:26,time:3},
+ nuggets:{name:"🍗 ناجتس",price:32,time:4},
+ lemonade:{name:"🍋 ليمونادة",price:22,time:2}
 };  
   
 const names=[  
@@ -1141,9 +1147,9 @@ function startGame(){
   if(!running||paused||!restaurantOpen)return;  
   
   let stageDifficulty=Math.max(0,currentStageNumber-1);
-  let maxCustomers=Math.min(10,3+Math.floor(stageDifficulty/2)+Math.floor(level/3));
+  let maxCustomers=Math.min(12,3+Math.floor(stageDifficulty/2)+Math.floor(level/3));
   if(customers.length<maxCustomers){ addCustomer(); }
- },Math.max(1800,5000-(Math.max(0,currentStageNumber-1)*220)-(level*60)));  
+ },Math.max(1600,5000-(Math.max(0,currentStageNumber-1)*220)-(level*60)));  
   
  patienceTimer=setInterval(updatePatience,1000);  
   
@@ -1204,7 +1210,7 @@ function addCustomer(){
  if(!running||paused||!restaurantOpen)return;  
   
  let stageDifficulty=Math.max(0,currentStageNumber-1);
- let maxCustomers=Math.min(10,3+Math.floor(stageDifficulty/2)+Math.floor(level/3));
+ let maxCustomers=Math.min(12,3+Math.floor(stageDifficulty/2)+Math.floor(level/3));
  if(customers.length>=maxCustomers)return;  
   
  let id=Date.now()+Math.random();  
@@ -1450,7 +1456,7 @@ function cook(food){
  if(slot<0){message("👨‍🍳👨‍🍳 الشيفان مشغولان — انتظر قليلًا");sound(180,.1);return;}
  const chefId=slot===0?"chef":"chef2",textId=slot===0?"cookText":"cookText2",progressId=slot===0?"progress":"progress2";
  const chef=document.getElementById(chefId);chef.classList.add("cooking");
- const positions={burger:"10%",chicken:"10%",steak:"10%",shawarma:"10%",fries:"10%",pizza:"35%",pie:"35%",pasta:"35%",salad:"72%",sandwich:"72%",sushi:"72%",juice:"88%",coffee:"88%",dessert:"88%",icecream:"88%",milkshake:"88%",tea:"88%"};
+ const positions={burger:"10%",chicken:"10%",steak:"10%",shawarma:"10%",fries:"10%",nuggets:"10%",soup:"35%",pizza:"35%",pie:"35%",pasta:"35%",salad:"72%",sandwich:"72%",sushi:"72%",juice:"88%",coffee:"88%",dessert:"88%",icecream:"88%",milkshake:"88%",tea:"88%",lemonade:"88%"};
  chef.style.left=positions[food]||"48%";
  const difficulty=Math.max(0,currentStageNumber-1);
  const duration=Math.max(1,Math.ceil(foods[food].time*.72)+Math.floor(difficulty/5)-upgrades.speed-Math.floor(upgrades.kitchen/2));

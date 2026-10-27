@@ -854,7 +854,7 @@ html body .skiptranslate iframe{visibility:hidden!important}
  <button onclick="serveFood()">🍽️ تقديم</button>  
 </div>
 
-   </div>     <div id="chef">👨‍🍳</div><div id="chef2">👨‍🍳</div><div id="cookText">الشيف الأول جاهز</div><div class="progress"><i id="progress"></i></div><div id="cookText2">الشيف الثاني جاهز</div><div class="progress"><i id="progress2"></i></div>    </div>   </div>  </section>  <!-- ================= MODAL ================= -->  <div id="modal" class="modal hidden">  
+   </div>     <div id="chef">👨‍🍳</div><div id="chef2">👨‍🍳</div><div id="chef3">👨‍🍳</div><div id="chef4">👨‍🍳</div><div id="chef5">👨‍🍳</div><div id="chef6">👨‍🍳</div><div class="chefStatusGrid"><div><div id="cookText">الشيف 1 جاهز</div><div class="progress"><i id="progress"></i></div></div><div><div id="cookText2">الشيف 2 جاهز</div><div class="progress"><i id="progress2"></i></div></div><div><div id="cookText3">الشيف 3 جاهز</div><div class="progress"><i id="progress3"></i></div></div><div><div id="cookText4">الشيف 4 جاهز</div><div class="progress"><i id="progress4"></i></div></div><div><div id="cookText5">الشيف 5 جاهز</div><div class="progress"><i id="progress5"></i></div></div><div><div id="cookText6">الشيف 6 جاهز</div><div class="progress"><i id="progress6"></i></div></div></div>    </div>   </div>  </section>  <!-- ================= MODAL ================= -->  <div id="modal" class="modal hidden">  
  <div class="modalbox" id="modalBox"></div>  
 </div>  <script>
 let currentStageNumber=1,unlockedStageNumber=1,stagePageNumber=0,stageRewardClaimed=false;
@@ -890,7 +890,7 @@ let seconds=0;
 let customers=[];  
 let orders=[];  
   
-let cooking=false; let currentFood=null; let chefJobs=[null,null];  
+let cooking=false; let currentFood=null; let chefJobs=Array(6).fill(null);  
   
 let gameTimer=null;  
 let customerTimer=null;  
@@ -1121,7 +1121,7 @@ function startGame(){
  totalOrders=0;  
  seconds=0;  
   
- customers=[];orders=[];chefJobs=[null,null];cooking=false;currentFood=null;serviceStreak=0;
+ customers=[];orders=[];chefJobs=Array(6).fill(null);cooking=false;currentFood=null;serviceStreak=0;
   const restaurantScene=document.getElementById("restaurant");
   if(restaurantScene)restaurantScene.dataset.stageTheme=String(((currentStageNumber-1)%6)+1);
  for(let i=1;i<=6;i++){const chef=document.getElementById(i===1?"chef":"chef"+i);if(chef){chef.classList.remove("cooking");chef.style.left=["48%","58%","18%","30%","70%","82%"][i-1];}const text=document.getElementById(i===1?"cookText":"cookText"+i);const bar=document.getElementById(i===1?"progress":"progress"+i);if(text)text.textContent="الشيف "+i+" جاهز";if(bar)bar.style.width="0%";}  
@@ -1182,7 +1182,7 @@ function clearAllTimers(){
  if(customerTimer)clearInterval(customerTimer);  
  if(patienceTimer)clearInterval(patienceTimer);  
  if(cookTimer)clearInterval(cookTimer);
- chefJobs.forEach(job=>{if(job&&job.timer)clearInterval(job.timer);});chefJobs=[null,null];cooking=false;
+ chefJobs.forEach(job=>{if(job&&job.timer)clearInterval(job.timer);});chefJobs=Array(6).fill(null);cooking=false;
  gameTimer=null;  
  customerTimer=null;  
  patienceTimer=null;  
@@ -1466,8 +1466,8 @@ function cook(food){
  let order=orders.find(o=>o.food===food&&!o.cooked&&!o.served&&!o.paid);
  if(!order){message("📋 لا يوجد طلب "+foods[food].name);sound(180,.1);return;}
  const slot=chefJobs.findIndex(job=>job===null);
- if(slot<0){message("👨‍🍳👨‍🍳 الشيفان مشغولان — انتظر قليلًا");sound(180,.1);return;}
- const chefId=slot===0?"chef":"chef2",textId=slot===0?"cookText":"cookText2",progressId=slot===0?"progress":"progress2";
+ if(slot<0){message("👨‍🍳 الشيفات الستة مشغولون — انتظر قليلًا");sound(180,.1);return;}
+ const chefId=slot===0?"chef":"chef"+(slot+1),textId=slot===0?"cookText":"cookText"+(slot+1),progressId=slot===0?"progress":"progress"+(slot+1);
  const chef=document.getElementById(chefId);chef.classList.add("cooking");
  const positions={burger:"10%",chicken:"10%",steak:"10%",shawarma:"10%",fries:"10%",nuggets:"10%",soup:"35%",pizza:"35%",pie:"35%",pasta:"35%",salad:"72%",sandwich:"72%",sushi:"72%",juice:"88%",coffee:"88%",dessert:"88%",icecream:"88%",milkshake:"88%",tea:"88%",lemonade:"88%"};
  chef.style.left=positions[food]||"48%";
@@ -1484,7 +1484,7 @@ function cook(food){
   else document.getElementById(textId).textContent="🍽️ تجهيز الطبق...";
   if(Math.random()<.04)sound(450,.03);
   if(progress>=100){
-   clearInterval(job.timer);chefJobs[slot]=null;cooking=chefJobs.some(Boolean);order.cooked=true;chef.classList.remove("cooking");chef.style.left=slot===0?"48%":"58%";
+   clearInterval(job.timer);chefJobs[slot]=null;cooking=chefJobs.some(Boolean);order.cooked=true;chef.classList.remove("cooking");chef.style.left=["48%","58%","18%","30%","70%","82%"][slot];
    document.getElementById(textId).textContent="✅ الطلب جاهز";document.getElementById(progressId).style.width="100%";
    message("🔔 "+foods[food].name+" جاهز — اضغط زر الصنف لتقديمه");sound(880,.14);setTimeout(()=>sound(1100,.12),130);renderOrders();
   }

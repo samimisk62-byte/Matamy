@@ -382,13 +382,16 @@ button{
  transition:transform .18s,box-shadow .18s,background .18s;  
 }  
 .station button:active{transform:scale(.96)}  
-.station button.foodButton{background:#f1c40f;color:#111;border:2px solid #ffcf4a}  
-.station button.drinkButton{background:#29b6f6;color:#082333;border:2px solid #80deea}  
-.station button.foodActive{background:#ff9800!important;color:#111!important;border-color:#fff176!important;box-shadow:0 0 8px #ffb300,0 0 18px #ff9800;animation:foodPulse .9s infinite alternate}  
-.station button.drinkActive{background:#00e5ff!important;color:#002b36!important;border-color:#fff!important;box-shadow:0 0 8px #00e5ff,0 0 18px #00bcd4;animation:drinkPulse .9s infinite alternate}  
-.station button.orderReady{outline:3px solid #69f0ae;box-shadow:0 0 12px #00e676}  
-@keyframes foodPulse{from{filter:brightness(1)}to{filter:brightness(1.28)}}  
-@keyframes drinkPulse{from{filter:brightness(1)}to{filter:brightness(1.3)}}  
+.station button.foodButton{background:#ff9800;color:#241300;border:2px solid #e68600;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
+.station button.drinkButton{background:#2196f3;color:#071b2d;border:2px solid #1976d2;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
+.station button.foodActive{background:#ff9800!important;color:#241300!important;border-color:#fff0a6!important;box-shadow:0 0 8px #ffb300,0 0 18px #ff9800!important;animation:foodPulse .65s infinite alternate}
+.station button.drinkActive{background:#2196f3!important;color:#071b2d!important;border-color:#b3e5fc!important;box-shadow:0 0 8px #42a5f5,0 0 18px #2196f3!important;animation:drinkPulse .65s infinite alternate}
+.station button.orderReady{outline:2px solid #fff!important;animation:readyBlink .48s infinite alternate!important}
+.station button.foodActive.orderReady{background:#ff9800!important;color:#241300!important;box-shadow:0 0 7px #ff9800,0 0 20px #ff9800!important}
+.station button.drinkActive.orderReady{background:#2196f3!important;color:#071b2d!important;box-shadow:0 0 7px #2196f3,0 0 20px #2196f3!important}
+@keyframes foodPulse{from{filter:brightness(1)}to{filter:brightness(1.45)}}
+@keyframes drinkPulse{from{filter:brightness(1)}to{filter:brightness(1.45)}}
+@keyframes readyBlink{from{filter:brightness(.8);outline-offset:0;box-shadow:0 0 3px currentColor!important}to{filter:brightness(1.65);outline-offset:2px;box-shadow:0 0 18px currentColor!important}}  
 .orderLegend{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:11px;margin:3px 0 6px}  
 .orderLegend span{padding:3px 7px;border-radius:7px}.foodLegend{background:#ff9800;color:#111}.drinkLegend{background:#00bcd4;color:#002b36}  
 #chef{  
@@ -792,7 +795,10 @@ button{
 </div>  <script>
 let currentStageNumber=1,unlockedStageNumber=1,stagePageNumber=0,stageRewardClaimed=false;
 try{currentStageNumber=Math.max(1,Number(localStorage.getItem("matamy_current_stage"))||1);unlockedStageNumber=Math.max(1,Number(localStorage.getItem("matamy_unlocked_stage"))||1);}catch(e){}
-function getRestaurantStageName(n){const names=["البداية","مطعم الحي","المطعم الشعبي","مطعم العائلة","المطعم الفاخر","سلسلة المطاعم","إمبراطورية الطعام"];return n<=names.length?names[n-1]:"إمبراطورية الطعام "+n;}
+function getRestaurantStageName(n){
+ const names=["البداية","مطعم الحي","المطعم الشعبي","مطعم العائلة","المطعم الفاخر","سلسلة المطاعم","إمبراطورية الطعام","مطعم النجوم","مدينة المطاعم","عاصمة الطعام"];
+ return n<=names.length?names[n-1]:names[7+((n-names.length-1)%3)]+" "+n;
+}
 function showStages(){running=false;paused=false;clearAllTimers();stopMusic();document.getElementById("home").classList.add("hidden");document.getElementById("game").classList.add("hidden");document.getElementById("stageMenu").classList.remove("hidden");renderRestaurantStages();}
 function renderRestaurantStages(){const grid=document.getElementById("stageGrid"),first=stagePageNumber*12+1,last=first+11;document.getElementById("stageRange").textContent="المراحل "+first+"–"+last;document.getElementById("stagePageLabel").textContent="صفحة "+(stagePageNumber+1);document.getElementById("stagePrev").disabled=stagePageNumber===0;grid.innerHTML="";for(let n=first;n<=last;n++){const unlocked=n<=unlockedStageNumber,card=document.createElement("button");card.className="restaurantStageCard"+(unlocked?"":" locked");card.innerHTML="<strong>"+(unlocked?"OPEN":"🔒")+" · "+n+"</strong><span>"+(n===1?"🍳 بداية المطعم":n<5?"🍔 مطعم نامٍ":n<13?"⭐ تحدٍ متقدم":"👑 تحدٍ احترافي")+"</span><small>"+(unlocked?"ابدأ المرحلة":"أكمل المرحلة السابقة")+"</small>";card.disabled=!unlocked;card.onclick=()=>openRestaurantStage(n);grid.appendChild(card);}}
 function changeStagePage(delta){stagePageNumber=Math.max(0,stagePageNumber+delta);renderRestaurantStages();}
@@ -1393,6 +1399,14 @@ function cook(food){
   return;  
  }  
   
+ let readyOrder=orders.find(o=>
+  o.food===food&&o.cooked&&!o.served&&!o.paid
+ );
+ if(readyOrder){
+  currentFood=food;
+  serveFood();
+  return;
+ }
  if(cooking){  
   
   message("👨‍🍳 الشيف مشغول بطلب آخر");  
@@ -1831,10 +1845,18 @@ function updateFoodButtonLights(){
  document.querySelectorAll("[data-food]").forEach(button=>{
   const key=button.dataset.food;
   const pending=orders.filter(o=>o.food===key&&!o.served&&!o.paid);
+  const ready=pending.some(o=>o.cooked);
   button.classList.remove("foodActive","drinkActive","orderReady");
-  if(!pending.length)return;
+  if(!pending.length){button.title="لا يوجد طلب";return;}
   button.classList.add(button.classList.contains("drinkButton")?"drinkActive":"foodActive");
-  if(pending.some(o=>o.cooked))button.classList.add("orderReady");
+  if(ready){
+   button.classList.add("orderReady");
+   button.setAttribute("aria-label",button.textContent.trim()+" — الطلب جاهز، اضغط للتقديم");
+   button.title="الطلب جاهز — اضغط نفس الزر لتقديمه";
+  }else{
+   button.setAttribute("aria-label",button.textContent.trim()+" — يوجد طلب جديد");
+   button.title="يوجد طلب — اضغط لبدء التحضير";
+  }
  });
 }
 
@@ -1842,62 +1864,16 @@ function updateFoodButtonLights(){
    المستوى والمراحل المتعددة  
 ===================================================== */  
   
-function getStageInfo(){  
-  
- let stages=[  
-  {  
-   name:"البداية",  
-   target:0,  
-   reward:0,  
-   text:"تعلم أساسيات إدارة المطعم."  
-  },  
-  {  
-   name:"مطعم الحي",  
-   target:5,  
-   reward:100,  
-   text:"استقبل أول زبائنك وطور المطبخ."  
-  },  
-  {  
-   name:"المطعم الشعبي",  
-   target:12,  
-   reward:180,  
-   text:"قدم أطعمة متنوعة بسرعة أكبر."  
-  },  
-  {  
-   name:"مطعم العائلة",  
-   target:22,  
-   reward:300,  
-   text:"حافظ على رضا الزبائن ووسع خدماتك."  
-  },  
-  {  
-   name:"المطعم الفاخر",  
-   target:35,  
-   reward:500,  
-   text:"قدم أطباقًا مميزة وحقق أرباحًا كبيرة."  
-  },  
-  {  
-   name:"سلسلة المطاعم",  
-   target:52,  
-   reward:800,  
-   text:"أصبحت تدير سلسلة مطاعم ناجحة."  
-  },  
-  {  
-   name:"إمبراطورية الطعام",  
-   target:75,  
-   reward:1200,  
-   text:"أنت الآن من كبار أصحاب المطاعم."  
-  }  
- ];  
-  
- let current=stages[0];  
-  
- stages.forEach(stage=>{  
-  if(served>=stage.target)current=stage;  
- });  
-  
- return current;  
-}  
-  
+function getStageInfo(){
+ const target=Math.max(5,currentStageNumber*3);
+ return {
+  name:getRestaurantStageName(currentStageNumber),
+  target:target,
+  reward:100+(currentStageNumber*50),
+  text:"أكمل "+target+" طلبًا لفتح المرحلة التالية."
+ };
+}
+
 function updateLevel(){
 
  let newLevel=Math.floor(served/5)+1;

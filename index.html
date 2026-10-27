@@ -1,7 +1,7 @@
 <!DOCTYPE html>  <html lang="ar" dir="rtl">  
 <head>  
 <meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">  
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">  
 <title>🍳 مطعمي V4</title>  <style>  
 *{box-sizing:border-box}  
 html,body{  
@@ -82,12 +82,18 @@ button{
  padding:7px 9px;  
  font-size:13px;  
 }  
-.topbar button{  
- background:#37474f;  
- color:#fff;  
- padding:7px 10px;  
- font-size:13px;  
-}  
+.topbar button{
+ background:#37474f;color:#fff;padding:8px 10px;min-height:40px;font-size:13px;
+ border:1px solid #607d8b;box-shadow:0 2px 5px #0008;white-space:nowrap;
+}
+.topbar .zoomControl{background:#1565c0;color:#fff;border:2px solid #90caf9;min-width:48px;font-size:15px}
+.topbar .zoomReadout{background:#263238;color:#fff;min-width:68px;text-align:center}
+.topbar .topAction{display:inline-flex;align-items:center;justify-content:center;gap:4px}
+@media(max-width:480px){
+ .topbar{gap:6px;padding:6px 4px}
+ .topbar .stat{font-size:12px;padding:6px 7px}
+ .topbar button{font-size:12px;padding:7px 8px;min-height:42px}
+}
   
 /* ================= RESTAURANT ================= */  
 #restaurant{  
@@ -702,13 +708,17 @@ button{
   <div class="stat">⭐ <span id="stars">0</span></div>  
   <div class="stat">📈 مستوى اللاعب <span id="level">1</span></div>  
   <div class="stat">🧾 طلبات <span id="ordersCount">0</span></div>  
-  <div class="stat">👥 مخدوم <span id="served">0</span></div>  <div class="stat">🎯 الهدف <span id="stageGoal">5</span></div>  <div class="stat">⏱️ <span id="clock">00:00</span></div>  <button onclick="toggleMusic()">🔊</button>
-<button onclick="showFinance()">🏦</button>
-<button onclick="showShop()">🛒</button>
-<button onclick="pauseGame()">⏸️</button>
-<button onclick="toggleRestaurant()">🔓 <span id="lockText">مفتوح</span></button>
-<button onclick="showRules()">📜</button>
-<button onclick="finishGame()">🏁</button><button class="stageX" onclick="exitToStages()" title="الرجوع للمراحل">✕ المراحل</button>
+  <div class="stat">👥 مخدوم <span id="served">0</span></div>  <div class="stat">🎯 الهدف <span id="stageGoal">5</span></div>  <div class="stat">⏱️ <span id="clock">00:00</span></div>  <button class="topAction" onclick="toggleMusic()" title="تشغيل أو إيقاف الصوت" aria-label="الصوت">🔊 <span>الصوت</span></button>
+<button class="topAction" onclick="showFinance()" title="عرض الحسابات والمالية" aria-label="المالية">🏦 <span>المالية</span></button>
+<button class="topAction" onclick="showShop()" title="فتح متجر التطوير" aria-label="المتجر">🛒 <span>المتجر</span></button>
+<button class="topAction" onclick="pauseGame()" title="إيقاف اللعب مؤقتًا أو المتابعة" aria-label="إيقاف مؤقت">⏸️ <span>إيقاف</span></button>
+<button class="topAction" onclick="toggleRestaurant()" title="فتح أو غلق المطعم" aria-label="فتح وغلق المطعم">🔓 <span id="lockText">مفتوح</span></button>
+<button class="topAction" onclick="showRules()" title="شرح طريقة اللعب" aria-label="القواعد">📜 <span>القواعد</span></button>
+<button class="topAction" onclick="finishGame()" title="إنهاء الجولة" aria-label="إنهاء الجولة">🏁 <span>إنهاء</span></button>
+<button class="stageX" onclick="exitToStages()" title="الرجوع للمراحل">✕ المراحل</button>
+<button class="zoomControl" onclick="changeGameZoom(-10)" title="تصغير الشاشة" aria-label="تصغير الشاشة">➖</button>
+<button class="zoomReadout" id="zoomReadout" title="نسبة تكبير الشاشة">100%</button>
+<button class="zoomControl" onclick="changeGameZoom(10)" title="تكبير الشاشة" aria-label="تكبير الشاشة">➕</button>
 
  </div>   <div id="restaurant">    <div class="wall top"></div>  
   <div class="wall bottom"></div>    <!-- الصالة -->    <div class="dining">     <h2 class="diningTitle">🍽️ صالة المطعم</h2>     <div class="floorText">  
@@ -2306,6 +2316,19 @@ function message(text){
 }  
   
   
+/* =====================================================
+   تكبير وتصغير واجهة اللعبة
+===================================================== */
+let gameZoomPercent=100;
+function changeGameZoom(step){
+ gameZoomPercent=Math.max(70,Math.min(130,gameZoomPercent+step));
+ document.documentElement.style.zoom=(gameZoomPercent/100);
+ const readout=document.getElementById("zoomReadout");
+ if(readout)readout.textContent=gameZoomPercent+"%";
+ const msg=document.getElementById("message");
+ if(msg)msg.textContent=gameZoomPercent===100?"🔎 حجم الشاشة الطبيعي":(gameZoomPercent<100?"🔎 تم تصغير الشاشة":"🔎 تم تكبير الشاشة");
+}
+
 /* =====================================================  
    النوافذ  
 ===================================================== */  

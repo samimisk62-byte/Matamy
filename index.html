@@ -382,17 +382,13 @@ button{
  transition:transform .18s,box-shadow .18s,background .18s;  
 }  
 .station button:active{transform:scale(.96)}  
-.station button.foodButton{background:#37474f;color:#e0e0e0;border:2px solid #455a64;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
-.station button.drinkButton{background:#37474f;color:#e0e0e0;border:2px solid #455a64;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
+/* لون الأزرار عند عدم وجود طلب: الأطعمة برتقالي والمشروبات أزرق */
+.station button.foodButton{background:#ff9800;color:#241300;border:2px solid #ffd180;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
+.station button.drinkButton{background:#2196f3;color:#071b2d;border:2px solid #90caf9;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
+.station button.orderReceived{background:#8d5524!important;color:#fff!important;border-color:#d7a36a!important;box-shadow:0 0 8px #8d5524!important;animation:none!important}
+.station button.preparingRed{background:#e53935!important;color:#fff!important;border-color:#ffcdd2!important;box-shadow:0 0 9px #e53935,0 0 16px #b71c1c!important;animation:preparingPulse .7s infinite alternate!important}
 .station button.servedGreen{background:#2ecc71!important;color:#062b13!important;border-color:#b9f6ca!important;box-shadow:0 0 10px #2ecc71!important;animation:none!important}
-.station button.foodActive{background:#ff9800!important;color:#241300!important;border-color:#fff0a6!important;box-shadow:0 0 8px #ffb300,0 0 18px #ff9800!important;animation:foodPulse .65s infinite alternate}
-.station button.drinkActive{background:#2196f3!important;color:#071b2d!important;border-color:#b3e5fc!important;box-shadow:0 0 8px #42a5f5,0 0 18px #2196f3!important;animation:drinkPulse .65s infinite alternate}
-.station button.orderReady{outline:2px solid #fff!important;animation:readyBlink .48s infinite alternate!important}
-.station button.foodActive.orderReady{background:#ff9800!important;color:#241300!important;box-shadow:0 0 7px #ff9800,0 0 20px #ff9800!important}
-.station button.drinkActive.orderReady{background:#2196f3!important;color:#071b2d!important;box-shadow:0 0 7px #2196f3,0 0 20px #2196f3!important}
-@keyframes foodPulse{from{filter:brightness(1)}to{filter:brightness(1.45)}}
-@keyframes drinkPulse{from{filter:brightness(1)}to{filter:brightness(1.45)}}
-@keyframes readyBlink{from{filter:brightness(.8);outline-offset:0;box-shadow:0 0 3px currentColor!important}to{filter:brightness(1.65);outline-offset:2px;box-shadow:0 0 18px currentColor!important}}  
+@keyframes preparingPulse{from{filter:brightness(.9)}to{filter:brightness(1.35)}}  
 .orderLegend{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:11px;margin:3px 0 6px}  
 .orderLegend span{padding:3px 7px;border-radius:7px}.foodLegend{background:#ff9800;color:#111}.drinkLegend{background:#00bcd4;color:#002b36}  
 #chef{  
@@ -751,7 +747,7 @@ button{
 
   </div>    <!-- رسالة -->    <div class="message" id="message">  
    👨‍🍳 الشيف جاهز للعمل  
-  </div>    <!-- الطبق -->    <div id="movingDish">🍽️</div>    <!-- المطبخ -->    <div class="kitchen">     <h2>👨‍🍳 المطبخ</h2><div class="orderLegend"><span class="foodLegend">🟠 الأطعمة المطلوبة</span><span class="drinkLegend">🔵 المشروبات المطلوبة</span></div>     <div class="stations">  <div class="station">  
+  </div>    <!-- الطبق -->    <div id="movingDish">🍽️</div>    <!-- المطبخ -->    <div class="kitchen">     <h2>👨‍🍳 المطبخ</h2><div class="orderLegend"><span style="background:#ff9800;color:#241300">🟠 طعام بلا طلب</span><span style="background:#2196f3;color:#071b2d">🔵 مشروب بلا طلب</span><span style="background:#8d5524;color:#fff">🟤 طلب جديد</span><span style="background:#e53935;color:#fff">🔴 تجهيز</span><span style="background:#2ecc71;color:#062b13">🟢 تم التقديم</span></div>     <div class="stations">  <div class="station">  
  <div class="stationIcon">🔥</div>  
  <b>البوتاجاز</b>  
 
@@ -1412,7 +1408,7 @@ function cook(food){
  const duration=Math.max(1,Math.ceil(foods[food].time*.72)+Math.floor(difficulty/5)-upgrades.speed-Math.floor(upgrades.kitchen/2));
  let progress=0;document.getElementById(textId).textContent="🔪 تحضير "+foods[food].name;document.getElementById(progressId).style.width="0%";
  currentFood=food;message("👨‍🍳 الشيف "+(slot+1)+" بدأ تحضير "+foods[food].name);sound(500,.1);
- const job={timer:null,order,food,chefId,textId,progressId};chefJobs[slot]=job;cooking=true;
+ const job={timer:null,order,food,chefId,textId,progressId};chefJobs[slot]=job;cooking=true;updateFoodButtonLights();
  job.timer=setInterval(()=>{
   if(!running||paused)return;
   progress+=100/(duration*10);document.getElementById(progressId).style.width=Math.min(100,progress)+"%";
@@ -1739,17 +1735,31 @@ function updateFoodButtonLights(){
  document.querySelectorAll("[data-food]").forEach(button=>{
   const key=button.dataset.food;
   const pending=orders.filter(o=>o.food===key&&!o.served&&!o.paid);
-  const ready=pending.some(o=>o.cooked);
   const servedWaiting=orders.some(o=>o.food===key&&o.served&&!o.paid);
-  button.classList.remove("foodActive","drinkActive","orderReady","servedGreen");
-  if(servedWaiting){button.classList.add("servedGreen");button.title="تم تقديم الطلب — في انتظار الدفع";button.setAttribute("aria-label",button.textContent.trim()+" — تم التقديم");return;}
-  if(!pending.length){button.title="لا يوجد طلب";button.setAttribute("aria-label",button.textContent.trim()+" — لا يوجد طلب");return;}
-  button.classList.add(button.classList.contains("drinkButton")?"drinkActive":"foodActive");
-  if(ready){button.classList.add("orderReady");button.setAttribute("aria-label",button.textContent.trim()+" — الطلب جاهز، اضغط للتقديم");button.title="الطلب جاهز — اضغط نفس الزر لتقديمه";}
-  else{button.setAttribute("aria-label",button.textContent.trim()+" — يوجد طلب جديد");button.title="يوجد طلب — اضغط لبدء التحضير";}
+  const isPreparing=pending.some(o=>chefJobs.some(job=>job&&job.order===o));
+  button.classList.remove("orderReceived","preparingRed","servedGreen");
+  if(pending.length){
+   if(isPreparing||pending.some(o=>o.cooked)){
+    button.classList.add("preparingRed");
+    button.title=pending.some(o=>o.cooked)?"الطلب جاهز — اضغط لتقديمه":"الشيف يحضّر الطلب";
+    button.setAttribute("aria-label",button.textContent.trim()+" — تجهيز الطلب");
+   }else{
+    button.classList.add("orderReceived");
+    button.title="وصل طلب الزبون — اضغط لبدء التحضير";
+    button.setAttribute("aria-label",button.textContent.trim()+" — طلب جديد");
+   }
+   return;
+  }
+  if(servedWaiting){
+   button.classList.add("servedGreen");
+   button.title="تم تقديم الطلب — في انتظار الدفع";
+   button.setAttribute("aria-label",button.textContent.trim()+" — تم التقديم");
+   return;
+  }
+  button.title="لا يوجد طلب";
+  button.setAttribute("aria-label",button.textContent.trim()+" — لا يوجد طلب");
  });
 }
-
 /* =====================================================  
    المستوى والمراحل المتعددة  
 ===================================================== */  

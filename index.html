@@ -586,6 +586,99 @@ button{
 .stagePager{display:flex;justify-content:center;align-items:center;gap:12px;margin:16px 0 8px;flex-wrap:wrap}.stagePager button,.stageHead button,.stageExitHome{background:#f39c12;color:#17100a}.stageExitHome{width:100%;margin-top:10px}
 .stageX{background:#c0392b!important;color:white!important;padding:8px 13px!important}
 @media(max-width:480px){.stageGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.restaurantStageCard{min-height:100px;padding:7px 3px}.restaurantStageCard strong{font-size:16px}.restaurantStageCard small{font-size:11px}.stageShell{padding:10px}}
+
+/* ================= VISUAL POLISH: RESTAURANT + CHARACTER MOTION ================= */
+#restaurant{
+ background:
+  radial-gradient(ellipse at 50% 30%,rgba(255,224,178,.20),transparent 55%),
+  repeating-linear-gradient(0deg,rgba(54,28,12,.10) 0 2px,transparent 2px 42px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.055) 0 2px,transparent 2px 42px),
+  linear-gradient(135deg,#a9784b,#795238 45%,#68442f);
+ box-shadow:inset 0 0 0 5px #4b2e1c,inset 0 0 35px #27160d88;
+}
+.wall.top{background:linear-gradient(180deg,#5d4037,#3e2723);box-shadow:0 5px 10px #0005}
+.wall.bottom{background:linear-gradient(180deg,#4e342e,#24150f)}
+.dining{
+ background:
+  radial-gradient(ellipse at 50% 10%,#d7c2a8 0,transparent 70%),
+  repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0 2px,transparent 2px 24px),
+  linear-gradient(135deg,#c7ad91,#9b8068);
+ box-shadow:inset 0 0 0 3px #ead6bb,0 8px 18px #2c160d55;
+}
+.table{
+ background:radial-gradient(circle at 35% 28%,#c28a54,#80502d 60%,#59351f);
+ border-color:#4b2b19;
+ box-shadow:inset 0 0 0 3px #d5a16b,0 9px 0 #382116,0 14px 18px #28140d55;
+}
+.chair{filter:drop-shadow(0 3px 2px #0005);animation:chairSway 3.5s ease-in-out infinite}
+.store,.cashier{
+ box-shadow:inset 0 0 0 2px #ffffff12,0 8px 18px #0005;
+}
+.store{background:linear-gradient(145deg,#795548,#4e342e);border-color:#3e2723}
+.cashier{background:linear-gradient(145deg,#546e7a,#263238);border-color:#111}
+.kitchen{
+ background:
+  radial-gradient(ellipse at 50% 0,rgba(255,255,255,.09),transparent 65%),
+  linear-gradient(145deg,#37474f,#1c292e);
+ box-shadow:inset 0 0 0 2px #607d8b,0 10px 24px #0005;
+}
+.station{
+ background:linear-gradient(145deg,#607d8b,#37474f 72%);
+ box-shadow:inset 0 0 0 1px #90a4ae55,0 4px 8px #0003;
+ transition:transform .2s,filter .2s;
+}
+.station:has(button:active){transform:translateY(2px)}
+.customer{
+ width:72px;height:96px;
+ filter:drop-shadow(0 5px 3px #24150d55);
+ will-change:left,top,transform;
+}
+.customerAvatar{
+ display:flex;align-items:center;justify-content:center;
+ width:58px;height:59px;margin:16px auto 0;
+ border-radius:48% 48% 43% 43%;
+ background:linear-gradient(145deg,#fff8e9,#d7c7b4);
+ border:2px solid #fff;
+ box-shadow:0 4px 0 #7b5a43,0 7px 12px #24150d35;
+ font-size:43px;line-height:1;
+ transform-origin:50% 90%;
+}
+.customerName{
+ top:-8px;background:#3e2723;color:#fff3d7;
+ border:1px solid #c99b6b;box-shadow:0 2px 5px #0004;
+}
+.customerBubble{
+ top:-36px;background:#fff8e8;color:#3e2723;
+ border:1px solid #e2c59d;box-shadow:0 4px 8px #0003;
+}
+.customer.walking .customerAvatar,.customer.cashier .customerAvatar{
+ animation:customerWalk .28s ease-in-out infinite alternate;
+}
+.customer.waiting .customerAvatar{animation:customerIdle 2.2s ease-in-out infinite}
+.customer.eating .customerAvatar{animation:customerEat .35s ease-in-out infinite alternate}
+.customer.leaving .customerAvatar{animation:customerWave .35s ease-in-out 2 alternate}
+.patience{bottom:-1px;border:1px solid #fff8;background:#39271d}
+.patience i{background:linear-gradient(90deg,#69f0ae,#2ecc71);transition:width .25s linear}
+#chef{
+ filter:drop-shadow(0 5px 3px #0007);
+ transform-origin:50% 90%;
+}
+#chef:not(.cooking){animation:chefIdle 2.4s ease-in-out infinite}
+#chef.cooking{animation:chefCook .32s ease-in-out infinite alternate;filter:drop-shadow(0 0 8px #ffb74d)}
+#movingDish{filter:drop-shadow(0 5px 4px #0008)}
+.door{background:linear-gradient(90deg,#795548,#4e342e);box-shadow:inset 0 0 0 2px #a9825b,0 6px 12px #0005}
+@keyframes customerWalk{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-3px) rotate(3deg)}}
+@keyframes customerIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes customerEat{from{transform:rotate(-3deg) scale(.98)}to{transform:rotate(3deg) scale(1.02)}}
+@keyframes customerWave{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+@keyframes chefIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes chefCook{from{transform:scale(1.08) rotate(-5deg)}to{transform:scale(1.16) rotate(5deg)}}
+@keyframes chairSway{0%,100%{transform:rotate(0)}50%{transform:rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){
+ .customerAvatar,#chef,.chair{animation:none!important}
+ *{scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
+
 </style>  </head>  <body>  <!-- ================= HOME ================= -->  <section id="home">  
  <div class="homebox">    <div class="biglogo">🍳👨‍🍳🍔</div>    <h1>مطعمي</h1>    <p>🍽️ لعبة إدارة مطعم ومطبخ متحرك</p>  <button onclick="showStages()">▶️ بداية اللعبة</button>
 
@@ -1073,6 +1166,7 @@ function addCustomer(){
   
   name:  
    names[Math.floor(Math.random()*names.length)],  
+  avatar:["🧑🏻","👩🏻","👨🏽","👩🏽","🧑🏾","👨🏻","👩🏼","🧑🏼"][Math.floor(Math.random()*8)],
   
   food:food,  
   
@@ -1164,7 +1258,7 @@ function drawCustomer(c){
    💭 ${foods[c.food].name}  
   </div>  
   
-  🧑  
+  <div class="customerAvatar">${c.avatar||'🧑🏻'}</div>
   
   <div class="patience">  
    <i></i>  
@@ -1182,7 +1276,11 @@ function positionCustomer(c){
   "customer-"+c.id  
  );  
   
- if(!el)return;  
+ if(!el)return;
+ el.classList.toggle("walking",c.state==="walking"||c.state==="enter"||c.state==="cashier");
+ el.classList.toggle("waiting",c.state==="waiting");
+ el.classList.toggle("eating",c.state==="eating");
+ el.classList.toggle("leaving",c.state==="leaving");
   
  let pos=[  
   {left:"18%",top:"210px"},  

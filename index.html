@@ -594,7 +594,7 @@ button{
 <button class="stageExitHome" onclick="goHome()">🏠 الرجوع للشاشة الرئيسية</button></div></section>
 <!-- ================= GAME ================= -->  <section id="game" class="hidden">   <div class="topbar">    <div class="stat">💰 <span id="money">100</span></div>  
   <div class="stat">⭐ <span id="stars">0</span></div>  
-  <div class="stat">🏆 مستوى <span id="level">1</span></div>  
+  <div class="stat">📈 مستوى اللاعب <span id="level">1</span></div>  
   <div class="stat">🧾 طلبات <span id="ordersCount">0</span></div>  
   <div class="stat">👥 مخدوم <span id="served">0</span></div>  <div class="stat">🎯 الهدف <span id="stageGoal">5</span></div>  <div class="stat">⏱️ <span id="clock">00:00</span></div>  <button onclick="toggleMusic()">🔊</button>
 <button onclick="showFinance()">🏦</button>
@@ -1811,53 +1811,56 @@ function getStageInfo(){
  return current;  
 }  
   
-function updateLevel(){  
-  
- let newLevel=  
-  Math.floor(served/5)+1;  
-  
- if(newLevel>level){  
-  
-  level=newLevel;  
-  
-  let reward=  
-   50+(level*20);  
-  
-  money+=reward;  
-  stars+=10;  
-  
-  financial.bonuses+=reward;  
-  
-  sound(700,.15);  
-  
-  setTimeout(()=>{  
-   sound(900,.15);  
-  },150);  
-  
-  message(  
-   "🎉 مستوى جديد! المستوى "+  
-   level+  
-   " — مكافأة "+reward+" جنيه"  
-  );  
-  
-  updateUI();  
- }  
-  
+function updateLevel(){
+
+ let newLevel=Math.floor(served/5)+1;
+
+ if(newLevel>level){
+  level=newLevel;
+  let levelReward=50+(level*20);
+  money+=levelReward;
+  stars+=10;
+  financial.bonuses+=levelReward;
+  sound(700,.15);
+  setTimeout(()=>sound(900,.15),150);
+  message("🎉 مستوى لاعب جديد! المستوى "+level+" — مكافأة "+levelReward+" جنيه");
+  updateUI();
+ }
+
  const stageGoal=Math.max(5,currentStageNumber*3);
  if(!stageRewardClaimed&&served>=stageGoal){
   stageRewardClaimed=true;
-  const stageReward=100+(currentStageNumber*50);
+  const completedStage=currentStageNumber;
+  const stageReward=100+(completedStage*50);
   money+=stageReward;
   stars+=20;
   financial.bonuses+=stageReward;
   unlockNextRestaurantStage();
-  message("🏆 أحسنت! أكملت هدف المرحلة "+currentStageNumber+" — مكافأة "+stageReward+" جنيه، والمرحلة التالية اتفتحت!");
+  paused=true;
   sound(1000,.18);
   updateUI();
+  openModal(`
+   <h2>🏆 أحسنت! أكملت المرحلة ${completedStage}</h2>
+   <div class="card">👥 عدد الزبائن المخدومين: <b>${served}</b></div>
+   <div class="card">💰 مكافأة المرحلة: <b>${stageReward}</b> جنيه</div>
+   <div class="card">⭐ مكافأة النجوم: <b>20</b> نجمة</div>
+   <div class="card good">🔓 تم فتح المرحلة ${completedStage+1}، لكنك لن تنتقل إليها تلقائيًا.</div>
+   <button onclick="closeStageReward(false)">▶️ متابعة المرحلة الحالية</button>
+   <button onclick="closeStageReward(true)">🗺️ اختيار المرحلة التالية</button>
+  `);
  }
-}  
-  
-  
+}
+
+function closeStageReward(goToStages){
+ closeModal();
+ if(goToStages){
+  showStages();
+ }else{
+  paused=false;
+  message("▶️ تقدر تكمل اللعب هنا أو تختار مرحلة أخرى من زر ✕ المراحل.");
+ }
+}
+
 /* =====================================================  
    فتح وغلق المطعم  
 ===================================================== */  

@@ -382,8 +382,9 @@ button{
  transition:transform .18s,box-shadow .18s,background .18s;  
 }  
 .station button:active{transform:scale(.96)}  
-.station button.foodButton{background:#ff9800;color:#241300;border:2px solid #e68600;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
-.station button.drinkButton{background:#2196f3;color:#071b2d;border:2px solid #1976d2;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
+.station button.foodButton{background:#37474f;color:#e0e0e0;border:2px solid #455a64;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
+.station button.drinkButton{background:#37474f;color:#e0e0e0;border:2px solid #455a64;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
+.station button.servedGreen{background:#2ecc71!important;color:#062b13!important;border-color:#b9f6ca!important;box-shadow:0 0 10px #2ecc71!important;animation:none!important}
 .station button.foodActive{background:#ff9800!important;color:#241300!important;border-color:#fff0a6!important;box-shadow:0 0 8px #ffb300,0 0 18px #ff9800!important;animation:foodPulse .65s infinite alternate}
 .station button.drinkActive{background:#2196f3!important;color:#071b2d!important;border-color:#b3e5fc!important;box-shadow:0 0 8px #42a5f5,0 0 18px #2196f3!important;animation:drinkPulse .65s infinite alternate}
 .station button.orderReady{outline:2px solid #fff!important;animation:readyBlink .48s infinite alternate!important}
@@ -402,9 +403,11 @@ button{
  z-index:80;  
  transition:left .6s ease,transform .3s;  
 }  
-#chef.cooking{  
- transform:scale(1.2) rotate(-4deg);  
-}  
+#chef.cooking,#chef2.cooking{transform:scale(1.2) rotate(-4deg)}
+#chef2{position:absolute;bottom:7px;left:58%;font-size:42px;z-index:79;transition:left .6s ease,transform .3s;filter:drop-shadow(0 5px 3px #0007)}
+#chef2.cooking{filter:drop-shadow(0 0 8px #ffb74d)}
+#cookText2{text-align:center;margin-top:2px;font-size:12px}
+#progress2{background:#00bcd4}
 #cookText{  
  text-align:center;  
  margin-top:2px;  
@@ -774,7 +777,9 @@ button{
 
  <button class="foodButton" data-food="salad" onclick="cook('salad')">🥗 سلطة</button>  
  <button class="foodButton" data-food="sandwich" onclick="cook('sandwich')">🥪 ساندويتش</button>  
- <button class="foodButton" data-food="sushi" onclick="cook('sushi')">🍣 سوشي</button>  
+ <button class="foodButton" data-food="sushi" onclick="cook('sushi')">🍣 سوشي</button>
+ <button class="foodButton" data-food="shawarma" onclick="cook('shawarma')">🌯 شاورما</button>
+ <button class="foodButton" data-food="fries" onclick="cook('fries')">🍟 بطاطس</button>  
 </div>  
 
 
@@ -783,14 +788,15 @@ button{
  <b>المشروبات</b>  
 
  <button class="drinkButton" data-food="juice" onclick="cook('juice')">🧃 عصير</button>  
- <button class="drinkButton" data-food="coffee" onclick="cook('coffee')">☕ قهوة</button>  
+ <button class="drinkButton" data-food="coffee" onclick="cook('coffee')">☕ قهوة</button>
+ <button class="drinkButton" data-food="tea" onclick="cook('tea')">🫖 شاي</button>
+ <button class="drinkButton" data-food="milkshake" onclick="cook('milkshake')">🥤 ميلك شيك</button>
+ <button class="foodButton" data-food="icecream" onclick="cook('icecream')">🍨 آيس كريم</button>  
  <button class="foodButton" data-food="dessert" onclick="cook('dessert')">🍰 حلوى</button>  
  <button onclick="serveFood()">🍽️ تقديم</button>  
 </div>
 
-   </div>     <div id="chef">👨‍🍳</div>     <div id="cookText">الشيف جاهز</div>     <div class="progress">  
-    <i id="progress"></i>  
-   </div>    </div>   </div>  </section>  <!-- ================= MODAL ================= -->  <div id="modal" class="modal hidden">  
+   </div>     <div id="chef">👨‍🍳</div><div id="chef2">👨‍🍳</div><div id="cookText">الشيف الأول جاهز</div><div class="progress"><i id="progress"></i></div><div id="cookText2">الشيف الثاني جاهز</div><div class="progress"><i id="progress2"></i></div>    </div>   </div>  </section>  <!-- ================= MODAL ================= -->  <div id="modal" class="modal hidden">  
  <div class="modalbox" id="modalBox"></div>  
 </div>  <script>
 let currentStageNumber=1,unlockedStageNumber=1,stagePageNumber=0,stageRewardClaimed=false;
@@ -825,8 +831,7 @@ let seconds=0;
 let customers=[];  
 let orders=[];  
   
-let cooking=false;  
-let currentFood=null;  
+let cooking=false; let currentFood=null; let chefJobs=[null,null];  
   
 let gameTimer=null;  
 let customerTimer=null;  
@@ -924,11 +929,12 @@ const foods={
   time:2  
  },  
   
- dessert:{  
-  name:"🍰 حلوى",  
-  price:28,  
-  time:3  
- }  
+ dessert:{name:"🍰 حلوى",price:28,time:3},
+ shawarma:{name:"🌯 شاورما",price:38,time:4},
+ fries:{name:"🍟 بطاطس مقلية",price:22,time:3},
+ icecream:{name:"🍨 آيس كريم",price:24,time:2},
+ milkshake:{name:"🥤 ميلك شيك",price:30,time:3},
+ tea:{name:"🫖 شاي",price:12,time:2}  
 };  
   
 const names=[  
@@ -1053,8 +1059,9 @@ function startGame(){
  totalOrders=0;  
  seconds=0;  
   
- customers=[];  
- orders=[];  
+ customers=[];orders=[];chefJobs=[null,null];cooking=false;currentFood=null;
+ document.getElementById("chef").classList.remove("cooking");document.getElementById("chef2").classList.remove("cooking");
+ document.getElementById("cookText").textContent="الشيف الأول جاهز";document.getElementById("cookText2").textContent="الشيف الثاني جاهز";document.getElementById("progress").style.width="0%";document.getElementById("progress2").style.width="0%";  
   
  financial={  
   sales:0,  
@@ -1111,8 +1118,8 @@ function clearAllTimers(){
  if(gameTimer)clearInterval(gameTimer);  
  if(customerTimer)clearInterval(customerTimer);  
  if(patienceTimer)clearInterval(patienceTimer);  
- if(cookTimer)clearInterval(cookTimer);  
-  
+ if(cookTimer)clearInterval(cookTimer);
+ chefJobs.forEach(job=>{if(job&&job.timer)clearInterval(job.timer);});chefJobs=[null,null];cooking=false;
  gameTimer=null;  
  customerTimer=null;  
  patienceTimer=null;  
@@ -1388,152 +1395,39 @@ function updatePatience(){
    الطبخ  
 ===================================================== */  
   
-function cook(food){  
-  
- if(!running||paused)return;  
-  
- if(!restaurantOpen){  
-  
-  message("🔒 المطعم مغلق");  
-  sound(160,.1);  
-  return;  
- }  
-  
- let readyOrder=orders.find(o=>
-  o.food===food&&o.cooked&&!o.served&&!o.paid
- );
- if(readyOrder){
-  currentFood=food;
-  serveFood();
-  return;
- }
- if(cooking){  
-  
-  message("👨‍🍳 الشيف مشغول بطلب آخر");  
-  sound(180,.1);  
-  return;  
- }  
-  
- let order=orders.find(o=>  
-  o.food===food&&  
-  !o.cooked&&  
-  !o.served&&  
-  !o.paid  
- );  
-  
- if(!order){  
-  
-  message(  
-   "📋 لا يوجد طلب "+foods[food].name  
-  );  
-  
-  sound(180,.1);  
-  
-  return;  
- }  
-  
- currentFood=food;  
- cooking=true;  
-  
- let chef=document.getElementById("chef");  
-  
- chef.classList.add("cooking");  
-  
- if(food==="burger"||food==="chicken"||food==="steak"){  
-  chef.style.left="10%";  
- }else if(food==="pizza"||food==="pie"||food==="pasta"){  
-  chef.style.left="35%";  
- }else if(food==="salad"||food==="sandwich"||food==="sushi"){  
-  chef.style.left="72%";  
- }else{  
-  chef.style.left="88%";  
- }  
-  
- let stageDifficulty=Math.max(0,currentStageNumber-1);
- let duration=Math.max(1,Math.ceil(foods[food].time*.72)+Math.floor(stageDifficulty/5)-upgrades.speed-Math.floor(upgrades.kitchen/2));  
-  
- let progress=0;  
-  
- document.getElementById("cookText")  
-  .textContent=  
-  "🔪 تحضير "+foods[food].name;  
-  
- document.getElementById("progress")  
-  .style.width="0%";  
-  
- message(  
-  "👨‍🍳 الشيف بدأ طبخ "+  
-  foods[food].name  
- );  
-  
- sound(500,.1);  
-  
- if(cookTimer)clearInterval(cookTimer);  
-  
- cookTimer=setInterval(()=>{  
-  
-  if(!running||paused)return;  
-  
-  progress+=100/(duration*10);  
-  
-  document.getElementById("progress")  
-   .style.width=Math.min(100,progress)+"%";  
-  
-  if(progress<30){  
-  
-   document.getElementById("cookText")  
-    .textContent="🔪 تجهيز المكونات...";  
-  
-  }else if(progress<65){  
-  
-   document.getElementById("cookText")  
-    .textContent="🔥 الطبخ على النار...";  
-  
-  }else{  
-  
-   document.getElementById("cookText")  
-    .textContent="🍽️ تجهيز الطبق...";  
-  }  
-  
-  if(Math.random()<.04)sound(450,.03);  
-  
-  if(progress>=100){  
-  
-   clearInterval(cookTimer);  
-   cookTimer=null;  
-  
-   cooking=false;  
-  
-   order.cooked=true;  
-  
-   chef.classList.remove("cooking");  
-   chef.style.left="48%";  
-  
-   document.getElementById("cookText")  
-    .textContent="✅ الطلب جاهز";  
-  
-   message(  
-    "🔔 "+foods[food].name+  
-    " جاهز — اضغط تقديم"  
-   );  
-  
-   sound(880,.14);  
-  
-   setTimeout(()=>{  
-    sound(1100,.12);  
-   },130);  
-  
-   renderOrders();  
-  }  
-  
- },100);  
-}  
-  
-  
-/* =====================================================  
-   تقديم الطبق  
-===================================================== */  
-  
+function cook(food){
+ if(!running||paused)return;
+ if(!restaurantOpen){message("🔒 المطعم مغلق");sound(160,.1);return;}
+ let readyOrder=orders.find(o=>o.food===food&&o.cooked&&!o.served&&!o.paid);
+ if(readyOrder){currentFood=food;serveFood();return;}
+ let order=orders.find(o=>o.food===food&&!o.cooked&&!o.served&&!o.paid);
+ if(!order){message("📋 لا يوجد طلب "+foods[food].name);sound(180,.1);return;}
+ const slot=chefJobs.findIndex(job=>job===null);
+ if(slot<0){message("👨‍🍳👨‍🍳 الشيفان مشغولان — انتظر قليلًا");sound(180,.1);return;}
+ const chefId=slot===0?"chef":"chef2",textId=slot===0?"cookText":"cookText2",progressId=slot===0?"progress":"progress2";
+ const chef=document.getElementById(chefId);chef.classList.add("cooking");
+ const positions={burger:"10%",chicken:"10%",steak:"10%",shawarma:"10%",fries:"10%",pizza:"35%",pie:"35%",pasta:"35%",salad:"72%",sandwich:"72%",sushi:"72%",juice:"88%",coffee:"88%",dessert:"88%",icecream:"88%",milkshake:"88%",tea:"88%"};
+ chef.style.left=positions[food]||"48%";
+ const difficulty=Math.max(0,currentStageNumber-1);
+ const duration=Math.max(1,Math.ceil(foods[food].time*.72)+Math.floor(difficulty/5)-upgrades.speed-Math.floor(upgrades.kitchen/2));
+ let progress=0;document.getElementById(textId).textContent="🔪 تحضير "+foods[food].name;document.getElementById(progressId).style.width="0%";
+ currentFood=food;message("👨‍🍳 الشيف "+(slot+1)+" بدأ تحضير "+foods[food].name);sound(500,.1);
+ const job={timer:null,order,food,chefId,textId,progressId};chefJobs[slot]=job;cooking=true;
+ job.timer=setInterval(()=>{
+  if(!running||paused)return;
+  progress+=100/(duration*10);document.getElementById(progressId).style.width=Math.min(100,progress)+"%";
+  if(progress<30)document.getElementById(textId).textContent="🔪 تجهيز المكونات...";
+  else if(progress<65)document.getElementById(textId).textContent="🔥 الطبخ على النار...";
+  else document.getElementById(textId).textContent="🍽️ تجهيز الطبق...";
+  if(Math.random()<.04)sound(450,.03);
+  if(progress>=100){
+   clearInterval(job.timer);chefJobs[slot]=null;cooking=chefJobs.some(Boolean);order.cooked=true;chef.classList.remove("cooking");chef.style.left=slot===0?"48%":"58%";
+   document.getElementById(textId).textContent="✅ الطلب جاهز";document.getElementById(progressId).style.width="100%";
+   message("🔔 "+foods[food].name+" جاهز — اضغط زر الصنف لتقديمه");sound(880,.14);setTimeout(()=>sound(1100,.12),130);renderOrders();
+  }
+ },100);
+}
+ 
 function serveFood(){  
   
  if(!running||paused)return;  
@@ -1846,17 +1740,13 @@ function updateFoodButtonLights(){
   const key=button.dataset.food;
   const pending=orders.filter(o=>o.food===key&&!o.served&&!o.paid);
   const ready=pending.some(o=>o.cooked);
-  button.classList.remove("foodActive","drinkActive","orderReady");
-  if(!pending.length){button.title="لا يوجد طلب";return;}
+  const servedWaiting=orders.some(o=>o.food===key&&o.served&&!o.paid);
+  button.classList.remove("foodActive","drinkActive","orderReady","servedGreen");
+  if(servedWaiting){button.classList.add("servedGreen");button.title="تم تقديم الطلب — في انتظار الدفع";button.setAttribute("aria-label",button.textContent.trim()+" — تم التقديم");return;}
+  if(!pending.length){button.title="لا يوجد طلب";button.setAttribute("aria-label",button.textContent.trim()+" — لا يوجد طلب");return;}
   button.classList.add(button.classList.contains("drinkButton")?"drinkActive":"foodActive");
-  if(ready){
-   button.classList.add("orderReady");
-   button.setAttribute("aria-label",button.textContent.trim()+" — الطلب جاهز، اضغط للتقديم");
-   button.title="الطلب جاهز — اضغط نفس الزر لتقديمه";
-  }else{
-   button.setAttribute("aria-label",button.textContent.trim()+" — يوجد طلب جديد");
-   button.title="يوجد طلب — اضغط لبدء التحضير";
-  }
+  if(ready){button.classList.add("orderReady");button.setAttribute("aria-label",button.textContent.trim()+" — الطلب جاهز، اضغط للتقديم");button.title="الطلب جاهز — اضغط نفس الزر لتقديمه";}
+  else{button.setAttribute("aria-label",button.textContent.trim()+" — يوجد طلب جديد");button.title="يوجد طلب — اضغط لبدء التحضير";}
  });
 }
 

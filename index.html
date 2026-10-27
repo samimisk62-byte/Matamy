@@ -913,7 +913,23 @@ let upgrades={
  quality:0,  
  cashier:0,  
  kitchen:0  
-};  
+};
+
+const MATAMY_ECONOMY_KEY="matamy_economy_v1";
+function loadRestaurantEconomy(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(MATAMY_ECONOMY_KEY)||"null");
+  if(!saved||typeof saved!=="object")return;
+  if(Number.isFinite(Number(saved.money)))money=Math.max(0,Number(saved.money));
+  if(saved.financial&&typeof saved.financial==="object")financial={sales:Number(saved.financial.sales)||0,expenses:Number(saved.financial.expenses)||0,tips:Number(saved.financial.tips)||0,bonuses:Number(saved.financial.bonuses)||0};
+  if(saved.upgrades&&typeof saved.upgrades==="object")upgrades={speed:Math.max(0,Number(saved.upgrades.speed)||0),quality:Math.max(0,Number(saved.upgrades.quality)||0),cashier:Math.max(0,Number(saved.upgrades.cashier)||0),kitchen:Math.max(0,Number(saved.upgrades.kitchen)||0)};
+ }catch(e){}
+}
+function saveRestaurantEconomy(){
+ try{localStorage.setItem(MATAMY_ECONOMY_KEY,JSON.stringify({money,financial,upgrades}));}catch(e){}
+}
+loadRestaurantEconomy();
+  
   
   
 /* =====================================================  
@@ -1113,7 +1129,6 @@ function startGame(){
  paused=false;  
  restaurantOpen=true;  
   
- money=100;  
  stars=0;  
  level=currentStageNumber;
  served=0;
@@ -1126,19 +1141,7 @@ function startGame(){
   if(restaurantScene)restaurantScene.dataset.stageTheme=String(((currentStageNumber-1)%6)+1);
  for(let i=1;i<=6;i++){const chef=document.getElementById(i===1?"chef":"chef"+i);if(chef){chef.classList.remove("cooking");chef.style.left=["48%","58%","18%","30%","70%","82%"][i-1];}const text=document.getElementById(i===1?"cookText":"cookText"+i);const bar=document.getElementById(i===1?"progress":"progress"+i);if(text)text.textContent="الشيف "+i+" جاهز";if(bar)bar.style.width="0%";}  
   
- financial={  
-  sales:0,  
-  expenses:0,  
-  tips:0,  
-  bonuses:0  
- };  
-  
- upgrades={  
-  speed:0,  
-  quality:0,  
-  cashier:0,  
-  kitchen:0  
- };  
+ saveRestaurantEconomy();  
   
  document.getElementById("home")  
   .classList.add("hidden");  
@@ -2369,6 +2372,7 @@ function updateUI(){
   
  document.getElementById("storeKitchen").textContent=  
   upgrades.kitchen;  
+ saveRestaurantEconomy();
 }  
   
   

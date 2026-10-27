@@ -388,13 +388,16 @@ button{
  transition:transform .18s,box-shadow .18s,background .18s;  
 }  
 .station button:active{transform:scale(.96)}  
-/* لون الأزرار عند عدم وجود طلب: الأطعمة برتقالي والمشروبات أزرق */
-.station button.foodButton{background:#ff9800;color:#241300;border:2px solid #ffd180;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
-.station button.drinkButton{background:#2196f3;color:#071b2d;border:2px solid #90caf9;box-shadow:none;animation:none;transition:background .18s,border-color .18s,box-shadow .18s}
-.station button.orderReceived{background:#8d5524!important;color:#fff!important;border-color:#d7a36a!important;box-shadow:0 0 8px #8d5524!important;animation:none!important}
-.station button.preparingRed{background:#e53935!important;color:#fff!important;border-color:#ffcdd2!important;box-shadow:0 0 9px #e53935,0 0 16px #b71c1c!important;animation:preparingPulse .7s infinite alternate!important}
-.station button.servedGreen{background:#2ecc71!important;color:#062b13!important;border-color:#b9f6ca!important;box-shadow:0 0 10px #2ecc71!important;animation:none!important}
-@keyframes preparingPulse{from{filter:brightness(.9)}to{filter:brightness(1.35)}}  
+/* الأزرار مطفأة عند عدم وجود طلب، وتضيء حسب حالة الطلب ونوعه */
+.station button.foodButton,.station button.drinkButton{background:#37474f;color:#b0bec5;border:2px solid #546e7a;box-shadow:none;animation:none;filter:saturate(.35);opacity:.72;transition:background .18s,border-color .18s,box-shadow .18s,opacity .18s,filter .18s}
+.station button.orderReceived.foodOrder{background:#ff9800!important;color:#241300!important;border-color:#ffd180!important;box-shadow:0 0 10px #ff9800!important;animation:none!important;opacity:1;filter:none}
+.station button.orderReceived.drinkOrder{background:#2196f3!important;color:#071b2d!important;border-color:#90caf9!important;box-shadow:0 0 10px #2196f3!important;animation:none!important;opacity:1;filter:none}
+.station button.preparingRed{background:#e53935!important;color:#fff!important;border-color:#ffcdd2!important;box-shadow:0 0 9px #e53935,0 0 16px #b71c1c!important;animation:preparingPulse .7s infinite alternate!important;opacity:1;filter:none}
+.station button.readyBlink.foodOrder{background:#ff9800!important;color:#241300!important;border-color:#fff3e0!important;box-shadow:0 0 13px #ff9800!important;animation:readyBlink .65s infinite alternate!important;opacity:1;filter:none}
+.station button.readyBlink.drinkOrder{background:#2196f3!important;color:#071b2d!important;border-color:#e3f2fd!important;box-shadow:0 0 13px #2196f3!important;animation:readyBlink .65s infinite alternate!important;opacity:1;filter:none}
+.station button.servedGreen{background:#2ecc71!important;color:#062b13!important;border-color:#b9f6ca!important;box-shadow:0 0 10px #2ecc71!important;animation:none!important;opacity:1;filter:none}
+@keyframes preparingPulse{from{filter:brightness(.78)}to{filter:brightness(1.35)}}
+@keyframes readyBlink{from{filter:brightness(.55)}to{filter:brightness(1.5)}}  
 .orderLegend{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:11px;margin:3px 0 6px}  
 .orderLegend span{padding:3px 7px;border-radius:7px}.foodLegend{background:#ff9800;color:#111}.drinkLegend{background:#00bcd4;color:#002b36}  
 #chef{  
@@ -1782,15 +1785,21 @@ function updateFoodButtonLights(){
   const pending=orders.filter(o=>o.food===key&&!o.served&&!o.paid);
   const servedWaiting=orders.some(o=>o.food===key&&o.served&&!o.paid);
   const isPreparing=pending.some(o=>chefJobs.some(job=>job&&job.order===o));
-  button.classList.remove("orderReceived","preparingRed","servedGreen");
+  const isReady=pending.some(o=>o.cooked);
+  button.classList.remove("orderReceived","preparingRed","readyBlink","servedGreen","foodOrder","drinkOrder");
+  button.classList.add(button.classList.contains("drinkButton")?"drinkOrder":"foodOrder");
   if(pending.length){
-   if(isPreparing||pending.some(o=>o.cooked)){
+   if(isReady){
+    button.classList.add("readyBlink");
+    button.title="الطلب جاهز — اضغط لتقديمه";
+    button.setAttribute("aria-label",button.textContent.trim()+" — الطلب جاهز للتقديم");
+   }else if(isPreparing){
     button.classList.add("preparingRed");
-    button.title=pending.some(o=>o.cooked)?"الطلب جاهز — اضغط لتقديمه":"الشيف يحضّر الطلب";
-    button.setAttribute("aria-label",button.textContent.trim()+" — تجهيز الطلب");
+    button.title="الشيف يحضّر الطلب";
+    button.setAttribute("aria-label",button.textContent.trim()+" — جارٍ التجهيز");
    }else{
     button.classList.add("orderReceived");
-    button.title="وصل طلب الزبون — اضغط لبدء التحضير";
+    button.title="وصل طلب جديد — اضغط لبدء التحضير";
     button.setAttribute("aria-label",button.textContent.trim()+" — طلب جديد");
    }
    return;

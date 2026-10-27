@@ -678,6 +678,12 @@ button{
 #chef.cooking{animation:chefCook .32s ease-in-out infinite alternate;filter:drop-shadow(0 0 8px #ffb74d)}
 #movingDish{filter:drop-shadow(0 5px 4px #0008)}
 .door{background:linear-gradient(90deg,#795548,#4e342e);box-shadow:inset 0 0 0 2px #a9825b,0 6px 12px #0005}
+/* ألوان وديكورات مختلفة تتغير حسب مرحلة المطعم */
+#restaurant[data-stage-theme="2"]{background:radial-gradient(ellipse at 50% 30%,#d9c7a0aa,transparent 55%),repeating-linear-gradient(0deg,#573d2618 0 2px,transparent 2px 42px),linear-gradient(135deg,#b28a62,#795238 45%,#68442f)}
+#restaurant[data-stage-theme="3"]{background:radial-gradient(ellipse at 50% 30%,#ffe0b255,transparent 55%),repeating-linear-gradient(0deg,#fff2 0 2px,transparent 2px 42px),linear-gradient(135deg,#647d83,#3d5960 48%,#263b40)}
+#restaurant[data-stage-theme="4"]{background:radial-gradient(ellipse at 50% 30%,#fff5d766,transparent 55%),repeating-linear-gradient(0deg,#fff2 0 2px,transparent 2px 42px),linear-gradient(135deg,#d4b46d,#8f6c3e 48%,#594126)}
+#restaurant[data-stage-theme="5"]{background:radial-gradient(ellipse at 50% 30%,#fff8e1aa,transparent 55%),repeating-linear-gradient(0deg,#ffffff18 0 2px,transparent 2px 42px),linear-gradient(135deg,#8c7da8,#51436b 48%,#28223a)}
+#restaurant[data-stage-theme="6"]{background:radial-gradient(ellipse at 50% 30%,#d4f4ffaa,transparent 55%),repeating-linear-gradient(0deg,#ffffff18 0 2px,transparent 2px 42px),linear-gradient(135deg,#4b8c76,#285b4a 48%,#16352b)}
 @keyframes customerWalk{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-3px) rotate(3deg)}}
 @keyframes customerIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @keyframes customerEat{from{transform:rotate(-3deg) scale(.98)}to{transform:rotate(3deg) scale(1.02)}}

@@ -182,8 +182,8 @@ button{
  font-size:47px;  
  text-align:center;  
  transition:  
- left .9s ease,  
- top .9s ease,  
+ left .45s ease,  
+ top .45s ease,  
  opacity .7s,  
  transform .35s;  
  pointer-events:none;  
@@ -374,12 +374,23 @@ button{
 .station button{  
  display:block;  
  width:100%;  
- padding:5px;  
- margin:3px 0;  
- font-size:11px;  
+ padding:7px 5px;  
+ margin:4px 0;  
+ font-size:12px;  
  background:#f1c40f;  
  color:#111;  
+ transition:transform .18s,box-shadow .18s,background .18s;  
 }  
+.station button:active{transform:scale(.96)}  
+.station button.foodButton{background:#f1c40f;color:#111;border:2px solid #ffcf4a}  
+.station button.drinkButton{background:#29b6f6;color:#082333;border:2px solid #80deea}  
+.station button.foodActive{background:#ff9800!important;color:#111!important;border-color:#fff176!important;box-shadow:0 0 8px #ffb300,0 0 18px #ff9800;animation:foodPulse .9s infinite alternate}  
+.station button.drinkActive{background:#00e5ff!important;color:#002b36!important;border-color:#fff!important;box-shadow:0 0 8px #00e5ff,0 0 18px #00bcd4;animation:drinkPulse .9s infinite alternate}  
+.station button.orderReady{outline:3px solid #69f0ae;box-shadow:0 0 12px #00e676}  
+@keyframes foodPulse{from{filter:brightness(1)}to{filter:brightness(1.28)}}  
+@keyframes drinkPulse{from{filter:brightness(1)}to{filter:brightness(1.3)}}  
+.orderLegend{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:11px;margin:3px 0 6px}  
+.orderLegend span{padding:3px 7px;border-radius:7px}.foodLegend{background:#ff9800;color:#111}.drinkLegend{background:#00bcd4;color:#002b36}  
 #chef{  
  position:absolute;  
  bottom:7px;  
@@ -417,7 +428,7 @@ button{
  display:none;  
  z-index:200;  
  font-size:38px;  
- transition:left 1s ease,top 1s ease;  
+ transition:left .55s ease,top .55s ease;  
  pointer-events:none;  
 }  
   
@@ -641,13 +652,13 @@ button{
 
   </div>    <!-- رسالة -->    <div class="message" id="message">  
    👨‍🍳 الشيف جاهز للعمل  
-  </div>    <!-- الطبق -->    <div id="movingDish">🍽️</div>    <!-- المطبخ -->    <div class="kitchen">     <h2>👨‍🍳 المطبخ</h2>     <div class="stations">  <div class="station">  
+  </div>    <!-- الطبق -->    <div id="movingDish">🍽️</div>    <!-- المطبخ -->    <div class="kitchen">     <h2>👨‍🍳 المطبخ</h2><div class="orderLegend"><span class="foodLegend">🟠 الأطعمة المطلوبة</span><span class="drinkLegend">🔵 المشروبات المطلوبة</span></div>     <div class="stations">  <div class="station">  
  <div class="stationIcon">🔥</div>  
  <b>البوتاجاز</b>  
 
- <button onclick="cook('burger')">🍔 برجر</button>  
- <button onclick="cook('chicken')">🍗 دجاج</button>  
- <button onclick="cook('steak')">🥩 ستيك</button>  
+ <button class="foodButton" data-food="burger" onclick="cook('burger')">🍔 برجر</button>  
+ <button class="foodButton" data-food="chicken" onclick="cook('chicken')">🍗 دجاج</button>  
+ <button class="foodButton" data-food="steak" onclick="cook('steak')">🥩 ستيك</button>  
 </div>  
 
 
@@ -655,9 +666,9 @@ button{
  <div class="stationIcon">🍕</div>  
  <b>الفرن</b>  
 
- <button onclick="cook('pizza')">🍕 بيتزا</button>  
- <button onclick="cook('pie')">🥧 فطيرة</button>  
- <button onclick="cook('pasta')">🍝 مكرونة</button>  
+ <button class="foodButton" data-food="pizza" onclick="cook('pizza')">🍕 بيتزا</button>  
+ <button class="foodButton" data-food="pie" onclick="cook('pie')">🥧 فطيرة</button>  
+ <button class="foodButton" data-food="pasta" onclick="cook('pasta')">🍝 مكرونة</button>  
 </div>  
 
 
@@ -665,9 +676,9 @@ button{
  <div class="stationIcon">🔪</div>  
  <b>التحضير</b>  
 
- <button onclick="cook('salad')">🥗 سلطة</button>  
- <button onclick="cook('sandwich')">🥪 ساندويتش</button>  
- <button onclick="cook('sushi')">🍣 سوشي</button>  
+ <button class="foodButton" data-food="salad" onclick="cook('salad')">🥗 سلطة</button>  
+ <button class="foodButton" data-food="sandwich" onclick="cook('sandwich')">🥪 ساندويتش</button>  
+ <button class="foodButton" data-food="sushi" onclick="cook('sushi')">🍣 سوشي</button>  
 </div>  
 
 
@@ -675,9 +686,9 @@ button{
  <div class="stationIcon">☕</div>  
  <b>المشروبات</b>  
 
- <button onclick="cook('juice')">🧃 عصير</button>  
- <button onclick="cook('coffee')">☕ قهوة</button>  
- <button onclick="cook('dessert')">🍰 حلوى</button>  
+ <button class="drinkButton" data-food="juice" onclick="cook('juice')">🧃 عصير</button>  
+ <button class="drinkButton" data-food="coffee" onclick="cook('coffee')">☕ قهوة</button>  
+ <button class="foodButton" data-food="dessert" onclick="cook('dessert')">🍰 حلوى</button>  
  <button onclick="serveFood()">🍽️ تقديم</button>  
 </div>
 
@@ -1112,7 +1123,7 @@ function addCustomer(){
    " يريد "+foods[c.food].name  
   );  
   
- },1500);  
+ },950);  
 }  
   
   
@@ -1327,7 +1338,7 @@ function cook(food){
  }  
   
  let stageDifficulty=Math.max(0,currentStageNumber-1);
- let duration=Math.max(1,foods[food].time+Math.floor(stageDifficulty/4)-upgrades.speed-Math.floor(upgrades.kitchen/2));  
+ let duration=Math.max(1,Math.ceil(foods[food].time*.72)+Math.floor(stageDifficulty/5)-upgrades.speed-Math.floor(upgrades.kitchen/2));  
   
  let progress=0;  
   
@@ -1533,9 +1544,9 @@ function serveFood(){
   
   setTimeout(()=>{  
    goToCashier(c,order);  
-  },2200);  
+  },1200);  
   
- },1200);  
+ },650);  
   
  currentFood=null;  
 }  
@@ -1569,7 +1580,7 @@ function goToCashier(c,order){
   
   payOrder(c,order);  
   
- },1400);  
+ },850);  
 }  
   
   
@@ -1615,7 +1626,7 @@ function payOrder(c,order){
   
  setTimeout(()=>{  
   customerLeave(c,true);  
- },1000);  
+ },600);  
 }  
   
   
@@ -1703,54 +1714,32 @@ function rearrangeCustomers(){
    عرض الطلبات  
 ===================================================== */  
   
-function renderOrders(){  
-  
- let box=document.getElementById("ordersList");  
-  
- if(!orders.length){  
-  
-  box.innerHTML="لا توجد طلبات";  
-  return;  
- }  
-  
- box.innerHTML="";  
-  
- orders.forEach(o=>{  
-  
-  let c=customers.find(  
-   x=>x.id===o.customerId  
-  );  
-  
-  if(!c)return;  
-  
-  let state=  
-   o.paid  
-   ?"💰 مدفوع"  
-   :o.served  
-   ?"🍽️ وصل"  
-   :o.cooked  
-   ?"🔔 جاهز"  
-   :"⏳ قيد الطبخ";  
-  
-  let div=document.createElement("div");  
-  
-  div.className=  
-   "order "+  
-   (o.cooked?"ready":"")+  
-   (o.paid?" paid":"");  
-  
-  div.innerHTML=`  
-   <b>${c.name}</b><br>  
-   ${foods[o.food].name}<br>  
-   💵 ${o.price} جنيه<br>  
-   ${state}  
-  `;  
-  
-  box.appendChild(div);  
- });  
-}  
-  
-  
+function renderOrders(){
+ let box=document.getElementById("ordersList");
+ if(!orders.length){box.innerHTML="لا توجد طلبات";updateFoodButtonLights();return;}
+ box.innerHTML="";
+ orders.forEach(o=>{
+  let c=customers.find(x=>x.id===o.customerId); if(!c)return;
+  let state=o.paid?"💰 مدفوع":o.served?"🍽️ وصل":o.cooked?"🔔 جاهز":"⏳ قيد الطبخ";
+  let div=document.createElement("div");
+  div.className="order "+(o.cooked?"ready":"")+(o.paid?" paid":"");
+  div.innerHTML="<b>"+c.name+"</b><br>"+foods[o.food].name+"<br>💵 "+o.price+" جنيه<br>"+state;
+  box.appendChild(div);
+ });
+ updateFoodButtonLights();
+}
+
+function updateFoodButtonLights(){
+ document.querySelectorAll("[data-food]").forEach(button=>{
+  const key=button.dataset.food;
+  const pending=orders.filter(o=>o.food===key&&!o.served&&!o.paid);
+  button.classList.remove("foodActive","drinkActive","orderReady");
+  if(!pending.length)return;
+  button.classList.add(button.classList.contains("drinkButton")?"drinkActive":"foodActive");
+  if(pending.some(o=>o.cooked))button.classList.add("orderReady");
+ });
+}
+
 /* =====================================================  
    المستوى والمراحل المتعددة  
 ===================================================== */  

@@ -408,11 +408,16 @@ button{
  z-index:80;  
  transition:left .6s ease,transform .3s;  
 }  
-#chef.cooking,#chef2.cooking{transform:scale(1.2) rotate(-4deg)}
+#chef.cooking,#chef2.cooking,#chef3.cooking,#chef4.cooking,#chef5.cooking,#chef6.cooking{transform:scale(1.2) rotate(-4deg)}
 #chef2{position:absolute;bottom:7px;left:58%;font-size:42px;z-index:79;transition:left .6s ease,transform .3s;filter:drop-shadow(0 5px 3px #0007)}
-#chef2.cooking{filter:drop-shadow(0 0 8px #ffb74d)}
-#cookText2{text-align:center;margin-top:2px;font-size:12px}
-#progress2{background:#00bcd4}
+#chef2.cooking,#chef3.cooking,#chef4.cooking,#chef5.cooking,#chef6.cooking{filter:drop-shadow(0 0 8px #ffb74d)}
+#chef3,#chef4,#chef5,#chef6{position:absolute;bottom:7px;font-size:38px;z-index:79;transition:left .6s ease,transform .3s;filter:drop-shadow(0 5px 3px #0007)}
+#chef3{left:18%}#chef4{left:30%}#chef5{left:70%}#chef6{left:82%}
+#cookText2,#cookText3,#cookText4,#cookText5,#cookText6{text-align:center;margin-top:2px;font-size:12px}
+#progress2{background:#00bcd4}#progress3{background:#ff9800}#progress4{background:#ab47bc}#progress5{background:#26a69a}#progress6{background:#ef5350}
+.chefStatusGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 8px;margin-top:4px}
+.chefStatusGrid .progress{width:95%;height:7px}
+@media(max-width:480px){#chef3,#chef4,#chef5,#chef6{font-size:30px}.chefStatusGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #cookText{  
  text-align:center;  
  margin-top:2px;  
@@ -1119,8 +1124,7 @@ function startGame(){
  customers=[];orders=[];chefJobs=[null,null];cooking=false;currentFood=null;serviceStreak=0;
   const restaurantScene=document.getElementById("restaurant");
   if(restaurantScene)restaurantScene.dataset.stageTheme=String(((currentStageNumber-1)%6)+1);
- document.getElementById("chef").classList.remove("cooking");document.getElementById("chef2").classList.remove("cooking");
- document.getElementById("cookText").textContent="الشيف الأول جاهز";document.getElementById("cookText2").textContent="الشيف الثاني جاهز";document.getElementById("progress").style.width="0%";document.getElementById("progress2").style.width="0%";  
+ for(let i=1;i<=6;i++){const chef=document.getElementById(i===1?"chef":"chef"+i);if(chef){chef.classList.remove("cooking");chef.style.left=["48%","58%","18%","30%","70%","82%"][i-1];}const text=document.getElementById(i===1?"cookText":"cookText"+i);const bar=document.getElementById(i===1?"progress":"progress"+i);if(text)text.textContent="الشيف "+i+" جاهز";if(bar)bar.style.width="0%";}  
   
  financial={  
   sales:0,  

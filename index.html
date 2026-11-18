@@ -1026,7 +1026,7 @@ function showRecipeShop(){
  let html='<h2>📖 متجر واستديو وصفات المطعم</h2><div class="card">💰 رصيدك: <b>'+money+'</b> عملة — الوصفات الجديدة بأسعار رمزية.</div>';
  Object.keys(extraFoods).forEach(k=>{const f=extraFoods[k],owned=matamyExtra.unlockedRecipes.includes(k);html+='<div class="shoprow"><span>'+f.name+'<br>قيمة الطلب '+f.price+' عملة</span><button '+(owned?'disabled':'')+' onclick="buyExtraRecipe(\''+k+'\')">'+(owned?'تم الشراء':'شراء الوصفة · '+f.recipePrice)+'</button></div>';});
  html+='<hr><h3>📸 استديو الوصفات</h3><div class="card">استورد صورًا وفيديوهات وملفات متعددة، أو التقط صورة بالكاميرا. المرفقات تحفظ في مكتبة مستقلة عن رصيد اللعبة.</div>';
- html+='<input id="recipeImportFile" type="file" multiple accept="image/*,video/*,.pdf,.txt,.json,.csv,.doc,.docx,.xls,.xlsx" style="width:100%;margin:8px 0;color:white"><input id="recipeCamera" type="file" accept="image/*" capture="environment" style="width:100%;margin:8px 0;color:white"><input id="recipeImportName" placeholder="اسم الوصفة" style="width:100%;padding:10px;border-radius:8px;margin:5px 0"><textarea id="recipeImportNotes" placeholder="المكونات وطريقة التحضير أو ملاحظاتك" style="width:100%;min-height:85px;padding:9px;border-radius:8px;margin:5px 0"></textarea><input id="recipeImportUrl" type="url" placeholder="رابط منشور عام من فيسبوك أو إنستجرام أو تيك توك أو يوتيوب" style="width:100%;padding:10px;border-radius:8px;margin:5px 0">';
+ html+='<label style="display:block;background:#1565c0;color:white;padding:12px;border-radius:12px;text-align:center;margin:8px 0;font-weight:bold">🖼️ اختيار الصور والملفات من الهاتف<input id="recipeImportFile" type="file" multiple accept="image/*,.pdf,.txt,.json,.csv,.doc,.docx,.xls,.xlsx" style="display:block;width:100%;margin-top:8px;color:white"></label><label style="display:block;background:#6a1b9a;color:white;padding:12px;border-radius:12px;text-align:center;margin:8px 0;font-weight:bold">🎥 اختيار فيديوهات من الهاتف<input id="recipeVideoFile" type="file" multiple accept="video/*" style="display:block;width:100%;margin-top:8px;color:white"></label><label style="display:block;background:#2e7d32;color:white;padding:12px;border-radius:12px;text-align:center;margin:8px 0;font-weight:bold">📷 التقاط صورة بالكاميرا<input id="recipeCamera" type="file" accept="image/*" capture="environment" style="display:block;width:100%;margin-top:8px;color:white"></label><input id="recipeImportName" placeholder="اسم الوصفة" style="width:100%;padding:10px;border-radius:8px;margin:5px 0"><textarea id="recipeImportNotes" placeholder="المكونات وطريقة التحضير أو ملاحظاتك" style="width:100%;min-height:85px;padding:9px;border-radius:8px;margin:5px 0"></textarea><input id="recipeImportUrl" type="url" placeholder="رابط منشور عام من فيسبوك أو إنستجرام أو تيك توك أو يوتيوب" style="width:100%;padding:10px;border-radius:8px;margin:5px 0">';
  html+='<div id="recipeDraftList" class="card">لم تختر مرفقات بعد.</div><button onclick="prepareRecipeFiles()">👁️ معاينة المرفقات</button> <button onclick="clearRecipeDraft()">إلغاء الصور والملفات المختارة</button> <button onclick="importMatamyRecipe()">💾 حفظ الوصفة</button>';
  html+='<hr><h3>🗂️ الأرشيف والاستديو ('+matamyExtra.importedRecipes.length+')</h3><button onclick="exportRecipeArchive()">📤 تصدير فهرس الأرشيف</button> <button onclick="showRecipeArchive()">فتح الأرشيف</button>';
  html+='<button onclick="showShop()">رجوع للمتجر</button> <button onclick="closeModal()">إغلاق</button>';
@@ -1035,13 +1035,14 @@ function showRecipeShop(){
 function escapeMatamyText(v){return String(v||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function selectedRecipeFiles(){
  const a=Array.from(document.getElementById("recipeImportFile")?.files||[]);
+ const v=Array.from(document.getElementById("recipeVideoFile")?.files||[]);
  const c=Array.from(document.getElementById("recipeCamera")?.files||[]);
- return a.concat(c);
+ return a.concat(v,c);
 }
 function clearRecipeDraft(){
- recipeDraftFiles=[];const f=document.getElementById("recipeImportFile"),c=document.getElementById("recipeCamera");
- if(f)f.value="";if(c)c.value="";
- const box=document.getElementById("recipeDraftList");if(box)box.textContent="تم إلغاء المرفقات المختارة.";
+ recipeDraftFiles=[];const f=document.getElementById("recipeImportFile"),v=document.getElementById("recipeVideoFile"),c=document.getElementById("recipeCamera");
+ if(f)f.value="";if(v)v.value="";if(c)c.value="";
+ const box=document.getElementById("recipeDraftList");if(box)box.textContent="تم إلغاء الصور والفيديوهات والملفات المختارة.";
 }
 async function prepareRecipeFiles(){
  const files=selectedRecipeFiles(),box=document.getElementById("recipeDraftList");

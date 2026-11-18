@@ -996,28 +996,146 @@ function buyExtraRecipe(key){
  money-=f.recipePrice;financial.expenses+=f.recipePrice;matamyExtra.unlockedRecipes.push(key);
  saveMatamyExtra();renderExtraFoodButtons();updateUI();showRecipeShop();
 }
+
+// مكتبة وصفات ووسائط المطعم: الملفات الكبيرة تحفظ في IndexedDB بدل مساحة إعدادات اللعبة.
+const MATAMY_MEDIA_DB="matamy_recipe_media_v1";
+let recipeDraftFiles=[];
+function openRecipeMediaDB(){
+ return new Promise((resolve,reject)=>{
+  if(!window.indexedDB){reject(new Error("IndexedDB غير متاح"));return;}
+  const req=indexedDB.open(MATAMY_MEDIA_DB,1);
+  req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains("media"))db.createObjectStore("media",{keyPath:"id"});};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+ });
+}
+async function putRecipeMedia(item){
+ const db=await openRecipeMediaDB();
+ return new Promise((resolve,reject)=>{const tx=db.transaction("media","readwrite");tx.objectStore("media").put(item);tx.oncomplete=()=>{db.close();resolve(true);};tx.onerror=()=>{db.close();reject(tx.error);};});
+}
+async function getRecipeMedia(id){
+ const db=await openRecipeMediaDB();
+ return new Promise((resolve,reject)=>{const req=db.transaction("media","readonly").objectStore("media").get(id);req.onsuccess=()=>{db.close();resolve(req.result||null);};req.onerror=()=>{db.close();reject(req.error);};});
+}
+async function deleteRecipeMedia(id){
+ const db=await openRecipeMediaDB();
+ return new Promise((resolve,reject)=>{const tx=db.transaction("media","readwrite");tx.objectStore("media").delete(id);tx.oncomplete=()=>{db.close();resolve(true);};tx.onerror=()=>{db.close();reject(tx.error);};});
+}
+function recipeMediaId(){return "rm_"+Date.now()+"_"+Math.random().toString(36).slice(2,9);}
 function showRecipeShop(){
- let html='<h2>📖 متجر وصفات المطعم</h2><div class="card">💰 رصيدك: <b>'+money+'</b> عملة — الوصفات الجديدة أسعارها رمزية.</div>';
+ recipeDraftFiles=[];
+ let html='<h2>📖 متجر واستديو وصفات المطعم</h2><div class="card">💰 رصيدك: <b>'+money+'</b> عملة — الوصفات الجديدة بأسعار رمزية.</div>';
  Object.keys(extraFoods).forEach(k=>{const f=extraFoods[k],owned=matamyExtra.unlockedRecipes.includes(k);html+='<div class="shoprow"><span>'+f.name+'<br>قيمة الطلب '+f.price+' عملة</span><button '+(owned?'disabled':'')+' onclick="buyExtraRecipe(\''+k+'\')">'+(owned?'تم الشراء':'شراء الوصفة · '+f.recipePrice)+'</button></div>';});
- html+='<hr><h3>📥 استيراد وصفاتك</h3><div class="card">تقدر تضيف وصفة من ملف نصي أو JSON أو PDF، أو تحفظ صورة الوصفة واسمها، أو تسجل رابط منشور من السوشيال ميديا. الروابط والصور تُحفظ كمرجع؛ اللعبة لا تسحب محتوى الحسابات الخاصة تلقائيًا.</div>';
- html+='<input id="recipeImportFile" type="file" accept=".txt,.json,.csv,.pdf,image/*" style="width:100%;margin:8px 0;color:white"><input id="recipeImportName" placeholder="اسم الوصفة" style="width:100%;padding:10px;border-radius:8px;margin:5px 0"><textarea id="recipeImportNotes" placeholder="المكونات وطريقة التحضير أو ملاحظاتك" style="width:100%;min-height:85px;padding:9px;border-radius:8px;margin:5px 0"></textarea><input id="recipeImportUrl" type="url" placeholder="رابط وصفة من فيسبوك أو إنستجرام أو تيك توك أو يوتيوب" style="width:100%;padding:10px;border-radius:8px;margin:5px 0"><button onclick="importMatamyRecipe()">💾 حفظ الوصفة</button>';
- html+='<h3>📚 وصفاتي المستوردة ('+matamyExtra.importedRecipes.length+')</h3>';
- matamyExtra.importedRecipes.forEach((x,i)=>{html+='<div class="card"><b>'+escapeMatamyText(x.name)+'</b><br><small>'+escapeMatamyText(x.fileName||"وصفة يدوية")+'</small><br>'+escapeMatamyText(x.notes||"")+(x.url?'<br><a href="'+encodeURI(x.url)+'" target="_blank" rel="noopener" style="color:#90caf9">فتح رابط المصدر</a>':"")+'</div>';});
+ html+='<hr><h3>📸 استديو الوصفات</h3><div class="card">استورد صورًا وفيديوهات وملفات متعددة، أو التقط صورة بالكاميرا. المرفقات تحفظ في مكتبة مستقلة عن رصيد اللعبة.</div>';
+ html+='<input id="recipeImportFile" type="file" multiple accept="image/*,video/*,.pdf,.txt,.json,.csv,.doc,.docx,.xls,.xlsx" style="width:100%;margin:8px 0;color:white"><input id="recipeCamera" type="file" accept="image/*" capture="environment" style="width:100%;margin:8px 0;color:white"><input id="recipeImportName" placeholder="اسم الوصفة" style="width:100%;padding:10px;border-radius:8px;margin:5px 0"><textarea id="recipeImportNotes" placeholder="المكونات وطريقة التحضير أو ملاحظاتك" style="width:100%;min-height:85px;padding:9px;border-radius:8px;margin:5px 0"></textarea><input id="recipeImportUrl" type="url" placeholder="رابط منشور عام من فيسبوك أو إنستجرام أو تيك توك أو يوتيوب" style="width:100%;padding:10px;border-radius:8px;margin:5px 0">';
+ html+='<div id="recipeDraftList" class="card">لم تختر مرفقات بعد.</div><button onclick="prepareRecipeFiles()">👁️ معاينة المرفقات</button> <button onclick="clearRecipeDraft()">إلغاء الصور والملفات المختارة</button> <button onclick="importMatamyRecipe()">💾 حفظ الوصفة</button>';
+ html+='<hr><h3>🗂️ الأرشيف والاستديو ('+matamyExtra.importedRecipes.length+')</h3><button onclick="exportRecipeArchive()">📤 تصدير فهرس الأرشيف</button> <button onclick="showRecipeArchive()">فتح الأرشيف</button>';
  html+='<button onclick="showShop()">رجوع للمتجر</button> <button onclick="closeModal()">إغلاق</button>';
  openModal(html);
 }
 function escapeMatamyText(v){return String(v||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function importMatamyRecipe(){
- const file=document.getElementById("recipeImportFile").files[0],name=document.getElementById("recipeImportName").value.trim(),notes=document.getElementById("recipeImportNotes").value.trim(),url=document.getElementById("recipeImportUrl").value.trim();
- if(!name){alert("اكتب اسم الوصفة أولًا.");return;}
- const save=(fileText="")=>{matamyExtra.importedRecipes.unshift({name,notes:notes||fileText.slice(0,5000),url,fileName:file?file.name:""});matamyExtra.importedRecipes=matamyExtra.importedRecipes.slice(0,100);saveMatamyExtra();showRecipeShop();};
- if(file && /\.(txt|json|csv)$/i.test(file.name)){const reader=new FileReader();reader.onload=()=>save(String(reader.result||""));reader.onerror=()=>alert("تعذر قراءة الملف.");reader.readAsText(file);}
- else if(file){save(notes||("تم إرفاق مرجع الملف: "+file.name+" — اكتب المكونات يدويًا في خانة الملاحظات حتى تصبح الوصفة قابلة للقراءة."));}
- else save();
+function selectedRecipeFiles(){
+ const a=Array.from(document.getElementById("recipeImportFile")?.files||[]);
+ const c=Array.from(document.getElementById("recipeCamera")?.files||[]);
+ return a.concat(c);
 }
-  
-  
-  
+function clearRecipeDraft(){
+ recipeDraftFiles=[];const f=document.getElementById("recipeImportFile"),c=document.getElementById("recipeCamera");
+ if(f)f.value="";if(c)c.value="";
+ const box=document.getElementById("recipeDraftList");if(box)box.textContent="تم إلغاء المرفقات المختارة.";
+}
+async function prepareRecipeFiles(){
+ const files=selectedRecipeFiles(),box=document.getElementById("recipeDraftList");
+ if(!files.length){if(box)box.textContent="لم تختر مرفقات بعد.";return;}
+ recipeDraftFiles=files;
+ if(box)box.innerHTML=files.map((f,i)=>'<div style="padding:5px;border-bottom:1px solid #777">📎 '+escapeMatamyText(f.name)+' · '+Math.ceil(f.size/1024)+' KB <button onclick="removeRecipeDraft('+i+')">حذف</button></div>').join("");
+}
+function removeRecipeDraft(index){
+ recipeDraftFiles.splice(index,1);
+ const box=document.getElementById("recipeDraftList");
+ if(box)box.innerHTML=recipeDraftFiles.length?recipeDraftFiles.map((f,i)=>'<div style="padding:5px">📎 '+escapeMatamyText(f.name)+' <button onclick="removeRecipeDraft('+i+')">حذف</button></div>').join(""):"تم حذف كل المرفقات المختارة.";
+}
+async function importMatamyRecipe(){
+ const name=document.getElementById("recipeImportName")?.value.trim()||"",notes=document.getElementById("recipeImportNotes")?.value.trim()||"",url=document.getElementById("recipeImportUrl")?.value.trim()||"";
+ if(!name){alert("اكتب اسم الوصفة أولًا.");return;}
+ const safeUrl=/^https?:\/\//i.test(url)?url:"";
+ const files=recipeDraftFiles.length?recipeDraftFiles:selectedRecipeFiles();
+ const recipe={id:recipeMediaId(),name,notes,url:safeUrl,createdAt:new Date().toISOString(),attachments:[]};
+ try{
+  for(const file of files){
+   if(file.size>80*1024*1024)throw new Error("الملف "+file.name+" أكبر من 80 ميجابايت.");
+   const id=recipeMediaId();
+   await putRecipeMedia({id,recipeId:recipe.id,name:file.name,type:file.type||"application/octet-stream",size:file.size,blob:file});
+   recipe.attachments.push({id,name:file.name,type:file.type||"application/octet-stream",size:file.size});
+  }
+  matamyExtra.importedRecipes.unshift(recipe);matamyExtra.importedRecipes=matamyExtra.importedRecipes.slice(0,100);
+  saveMatamyExtra();showRecipeShop();
+ }catch(e){alert("تعذر حفظ المرفقات: "+(e.message||"مساحة التخزين غير كافية"));}
+}
+function downloadRecipeBlob(blob,name){
+ const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1500);
+}
+async function exportRecipeArchive(){
+ const data={format:"matamy-recipe-archive",version:1,recipes:matamyExtra.importedRecipes.map(r=>({id:r.id,name:r.name,notes:r.notes,url:r.url,createdAt:r.createdAt,attachments:r.attachments||[]}))};
+ downloadRecipeBlob(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),"matamy-recipe-archive.json");
+}
+async function exportRecipe(id){
+ const r=matamyExtra.importedRecipes.find(x=>x.id===id);if(!r)return;
+ const attachments=[];
+ for(const meta of (r.attachments||[])){
+  const item=await getRecipeMedia(meta.id);if(!item)continue;
+  const data=await new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=reject;fr.readAsDataURL(item.blob);});
+  attachments.push({name:item.name,type:item.type,data});
+ }
+ const pack={format:"matamy-recipe",version:1,recipe:{id:r.id,name:r.name,notes:r.notes,url:r.url,createdAt:r.createdAt},attachments};
+ downloadRecipeBlob(new Blob([JSON.stringify(pack)],{type:"application/json"}),"recipe-"+r.name.replace(/[^\w\u0600-\u06FF-]/g,"_")+".json");
+}
+async function previewRecipeMedia(id){
+ const item=await getRecipeMedia(id);if(!item){alert("المرفق غير موجود في الاستديو.");return;}
+ const url=URL.createObjectURL(item.blob);
+ if(item.type.startsWith("image/"))openModal('<h3>'+escapeMatamyText(item.name)+'</h3><img src="'+url+'" style="max-width:100%;max-height:65vh;object-fit:contain"><button onclick="closeModal()">إغلاق</button>');
+ else if(item.type.startsWith("video/"))openModal('<h3>'+escapeMatamyText(item.name)+'</h3><video src="'+url+'" controls playsinline style="width:100%;max-height:65vh"></video><button onclick="closeModal()">إغلاق</button>');
+ else {downloadRecipeBlob(item.blob,item.name);URL.revokeObjectURL(url);}
+}
+async function deleteRecipeAttachment(recipeId,mediaId){
+ const r=matamyExtra.importedRecipes.find(x=>x.id===recipeId);if(!r)return;
+ await deleteRecipeMedia(mediaId);r.attachments=(r.attachments||[]).filter(x=>x.id!==mediaId);saveMatamyExtra();showRecipeArchive();
+}
+async function deleteMatamyRecipe(recipeId){
+ if(!confirm("هل تريد حذف الوصفة وكل الصور والفيديوهات والملفات التابعة لها؟"))return;
+ const r=matamyExtra.importedRecipes.find(x=>x.id===recipeId);if(!r)return;
+ for(const a of (r.attachments||[]))await deleteRecipeMedia(a.id);
+ matamyExtra.importedRecipes=matamyExtra.importedRecipes.filter(x=>x.id!==recipeId);saveMatamyExtra();showRecipeArchive();
+}
+async function convertRecipeImage(recipeId,mediaId,format){
+ const item=await getRecipeMedia(mediaId);if(!item||!item.type.startsWith("image/")){alert("التحويل متاح حاليًا للصور.");return;}
+ const url=URL.createObjectURL(item.blob),img=new Image();
+ img.onload=async()=>{
+  const canvas=document.createElement("canvas");canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+  const ctx=canvas.getContext("2d");if(format==="image/jpeg"){ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);}
+  ctx.drawImage(img,0,0);
+  canvas.toBlob(async blob=>{
+   if(!blob){alert("تعذر تحويل الصورة.");URL.revokeObjectURL(url);return;}
+   const id=recipeMediaId(),name=item.name.replace(/\.[^.]+$/,"")+(format==="image/png"?".png":".jpg");
+   await putRecipeMedia({id,recipeId,name,type:format,size:blob.size,blob});
+   const r=matamyExtra.importedRecipes.find(x=>x.id===recipeId);r.attachments.push({id,name,type:format,size:blob.size});saveMatamyExtra();URL.revokeObjectURL(url);showRecipeArchive();
+  },format,.9);
+ };img.onerror=()=>{URL.revokeObjectURL(url);alert("تعذر فتح الصورة.");};img.src=url;
+}
+async function showRecipeArchive(){
+ let html='<h2>🗂️ أرشيف وصفات المطعم</h2>';
+ if(!matamyExtra.importedRecipes.length)html+='<div class="card">الأرشيف فارغ حتى الآن.</div>';
+ for(const r of matamyExtra.importedRecipes){
+  html+='<div class="card"><b>'+escapeMatamyText(r.name)+'</b><p>'+escapeMatamyText(r.notes||"")+'</p>'+(r.url?'<a href="'+encodeURI(r.url)+'" target="_blank" rel="noopener">فتح رابط المصدر</a><br>':"");
+  for(const a of (r.attachments||[])){
+   html+='<div style="padding:5px;border-top:1px solid #777">📎 '+escapeMatamyText(a.name)+' · '+Math.ceil(a.size/1024)+' KB <button onclick="previewRecipeMedia(\''+a.id+'\')">فتح</button> <button onclick="deleteRecipeAttachment(\''+r.id+'\',\''+a.id+'\')">حذف</button>';
+   if((a.type||"").startsWith("image/"))html+=' <button onclick="convertRecipeImage(\''+r.id+'\',\''+a.id+'\',\'image/jpeg\')">تحويل JPG</button> <button onclick="convertRecipeImage(\''+r.id+'\',\''+a.id+'\',\'image/png\')">تحويل PNG</button>';
+   html+='</div>';
+  }
+  html+='<button onclick="exportRecipe(\''+r.id+'\')">📤 تصدير الوصفة ومرفقاتها</button> <button onclick="deleteMatamyRecipe(\''+r.id+'\')">🗑️ حذف الوصفة كاملة</button></div>';
+ }
+ html+='<button onclick="exportRecipeArchive()">تصدير فهرس الأرشيف</button> <button onclick="showRecipeShop()">رجوع للاستديو</button> <button onclick="closeModal()">إغلاق</button>';
+ openModal(html);
+}
 /* =====================================================  
    الأطعمة  
 ===================================================== */  

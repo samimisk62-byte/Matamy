@@ -929,6 +929,92 @@ function saveRestaurantEconomy(){
  try{localStorage.setItem(MATAMY_ECONOMY_KEY,JSON.stringify({money,financial,upgrades}));}catch(e){}
 }
 loadRestaurantEconomy();
+
+// متجر الشيفات والوصفات — بيانات مستقلة حتى لا تتأثر الخزنة والترقيات القديمة.
+const MATAMY_EXTRA_KEY="matamy_chefs_recipes_v1";
+let matamyExtra={chefCount:1,chefRanks:[1],unlockedRecipes:[],importedRecipes:[]};
+function loadMatamyExtra(){
+ try{
+  const x=JSON.parse(localStorage.getItem(MATAMY_EXTRA_KEY)||"null");
+  if(x&&typeof x==="object"){
+   matamyExtra.chefCount=Math.max(1,Math.min(6,Number(x.chefCount)||1));
+   matamyExtra.chefRanks=Array.isArray(x.chefRanks)?x.chefRanks.slice(0,6):[1];
+   while(matamyExtra.chefRanks.length<matamyExtra.chefCount)matamyExtra.chefRanks.push(matamyExtra.chefRanks.length+1);
+   matamyExtra.unlockedRecipes=Array.isArray(x.unlockedRecipes)?x.unlockedRecipes:[];
+   matamyExtra.importedRecipes=Array.isArray(x.importedRecipes)?x.importedRecipes:[];
+  }
+ }catch(e){}
+}
+function saveMatamyExtra(){try{localStorage.setItem(MATAMY_EXTRA_KEY,JSON.stringify(matamyExtra));}catch(e){message("مساحة الحفظ ممتلئة؛ لم يتم حفظ آخر وصفة.");}}
+loadMatamyExtra();
+const chefPrices=[0,250,650,1400,2800,5200];
+const chefSpeed=[1,1.12,1.25,1.4,1.58,1.8];
+const extraFoods={
+ ramen:{name:"🍜 رامن ياباني",price:58,time:7,recipePrice:8,station:"prep"},
+ taco:{name:"🌮 تاكو مكسيكي",price:42,time:5,recipePrice:6,station:"prep"},
+ dragon:{name:"🐉 نودلز التنين",price:75,time:8,recipePrice:12,station:"prep"},
+ mochi:{name:"🍡 موتشي ياباني",price:36,time:4,recipePrice:5,station:"prep"},
+ falafel_sushi:{name:"🍣 سوشي الفلافل",price:48,time:6,recipePrice:7,station:"prep"},
+ blue_pasta:{name:"🦋 مكرونة زرقاء",price:62,time:7,recipePrice:10,station:"prep"},
+ volcano_burger:{name:"🌋 برجر البركان",price:85,time:9,recipePrice:14,station:"prep"},
+ gold_dessert:{name:"✨ حلوى الذهب",price:68,time:6,recipePrice:11,station:"prep"}
+};
+Object.keys(extraFoods).forEach(k=>{if(!matamyExtra.unlockedRecipes.includes(k)){} });
+function renderExtraFoodButtons(){
+ const stations=document.querySelectorAll(".stations .station");
+ const target=stations[2]; if(!target)return;
+ let box=document.getElementById("extraFoodButtons");
+ if(!box){box=document.createElement("div");box.id="extraFoodButtons";box.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:5px";target.appendChild(box);}
+ box.innerHTML="";
+ matamyExtra.unlockedRecipes.forEach(key=>{
+  const f=extraFoods[key];if(!f)return;
+  const b=document.createElement("button");b.className="foodButton";b.dataset.food=key;b.textContent=f.name;b.onclick=()=>cook(key);box.appendChild(b);
+ });
+}
+function buyChef(){
+ const next=matamyExtra.chefCount+1;
+ if(next>6){alert("وصلت لأقصى عدد من الشيفات (6).");return;}
+ const price=chefPrices[next-1];
+ if(money<price){alert("💸 محتاج تجمع عملات أكثر لشراء الشيف التالي.");return;}
+ money-=price;financial.expenses+=price;matamyExtra.chefCount=next;matamyExtra.chefRanks.push(next);
+ saveMatamyExtra();updateChefVisibility();updateUI();showShop();
+}
+function updateChefVisibility(){
+ for(let i=1;i<=6;i++){
+  const el=document.getElementById(i===1?"chef":"chef"+i);
+  const status=document.getElementById(i===1?"cookText":"cookText"+i);
+  const bar=document.getElementById(i===1?"progress":"progress"+i);
+  const owned=i<=matamyExtra.chefCount;
+  if(el)el.style.display=owned?"block":"none";
+  if(status&& !owned)status.textContent="🔒 شيف غير مشتَرى";
+  if(bar&& !owned)bar.style.width="0%";
+ }
+}
+function buyExtraRecipe(key){
+ const f=extraFoods[key];if(!f||matamyExtra.unlockedRecipes.includes(key))return;
+ if(money<f.recipePrice){alert("💸 رصيدك لا يكفي لشراء الوصفة.");return;}
+ money-=f.recipePrice;financial.expenses+=f.recipePrice;matamyExtra.unlockedRecipes.push(key);
+ saveMatamyExtra();renderExtraFoodButtons();updateUI();showRecipeShop();
+}
+function showRecipeShop(){
+ let html='<h2>📖 متجر وصفات المطعم</h2><div class="card">💰 رصيدك: <b>'+money+'</b> عملة — الوصفات الجديدة أسعارها رمزية.</div>';
+ Object.keys(extraFoods).forEach(k=>{const f=extraFoods[k],owned=matamyExtra.unlockedRecipes.includes(k);html+='<div class="shoprow"><span>'+f.name+'<br>قيمة الطلب '+f.price+' عملة</span><button '+(owned?'disabled':'')+' onclick="buyExtraRecipe(\''+k+'\')">'+(owned?'تم الشراء':'شراء الوصفة · '+f.recipePrice)+'</button></div>';});
+ html+='<hr><h3>📥 استيراد وصفاتك</h3><div class="card">تقدر تضيف وصفة من ملف نصي أو JSON أو PDF، أو تحفظ صورة الوصفة واسمها، أو تسجل رابط منشور من السوشيال ميديا. الروابط والصور تُحفظ كمرجع؛ اللعبة لا تسحب محتوى الحسابات الخاصة تلقائيًا.</div>';
+ html+='<input id="recipeImportFile" type="file" accept=".txt,.json,.csv,.pdf,image/*" style="width:100%;margin:8px 0;color:white"><input id="recipeImportName" placeholder="اسم الوصفة" style="width:100%;padding:10px;border-radius:8px;margin:5px 0"><textarea id="recipeImportNotes" placeholder="المكونات وطريقة التحضير أو ملاحظاتك" style="width:100%;min-height:85px;padding:9px;border-radius:8px;margin:5px 0"></textarea><input id="recipeImportUrl" type="url" placeholder="رابط وصفة من فيسبوك أو إنستجرام أو تيك توك أو يوتيوب" style="width:100%;padding:10px;border-radius:8px;margin:5px 0"><button onclick="importMatamyRecipe()">💾 حفظ الوصفة</button>';
+ html+='<h3>📚 وصفاتي المستوردة ('+matamyExtra.importedRecipes.length+')</h3>';
+ matamyExtra.importedRecipes.forEach((x,i)=>{html+='<div class="card"><b>'+escapeMatamyText(x.name)+'</b><br><small>'+escapeMatamyText(x.fileName||"وصفة يدوية")+'</small><br>'+escapeMatamyText(x.notes||"")+(x.url?'<br><a href="'+encodeURI(x.url)+'" target="_blank" rel="noopener" style="color:#90caf9">فتح رابط المصدر</a>':"")+'</div>';});
+ html+='<button onclick="showShop()">رجوع للمتجر</button> <button onclick="closeModal()">إغلاق</button>';
+ openModal(html);
+}
+function escapeMatamyText(v){return String(v||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function importMatamyRecipe(){
+ const file=document.getElementById("recipeImportFile").files[0],name=document.getElementById("recipeImportName").value.trim(),notes=document.getElementById("recipeImportNotes").value.trim(),url=document.getElementById("recipeImportUrl").value.trim();
+ if(!name){alert("اكتب اسم الوصفة أولًا.");return;}
+ const save=(fileText="")=>{matamyExtra.importedRecipes.unshift({name,notes:notes||fileText.slice(0,5000),url,fileName:file?file.name:""});matamyExtra.importedRecipes=matamyExtra.importedRecipes.slice(0,100);saveMatamyExtra();showRecipeShop();};
+ if(file && /\.(txt|json|csv)$/i.test(file.name)){const reader=new FileReader();reader.onload=()=>save(String(reader.result||""));reader.onerror=()=>alert("تعذر قراءة الملف.");reader.readAsText(file);}
+ else if(file){save(notes||("تم إرفاق مرجع الملف: "+file.name+" — اكتب المكونات يدويًا في خانة الملاحظات حتى تصبح الوصفة قابلة للقراءة."));}
+ else save();
+}
   
   
   
@@ -1012,7 +1098,8 @@ const foods={
  tea:{name:"🫖 شاي",price:12,time:2},
  soup:{name:"🍲 شوربة",price:26,time:3},
  nuggets:{name:"🍗 ناجتس",price:32,time:4},
- lemonade:{name:"🍋 ليمونادة",price:22,time:2}
+ lemonade:{name:"🍋 ليمونادة",price:22,time:2},
+ ...extraFoods
 };  
   
 const names=[  
@@ -1231,7 +1318,7 @@ function addCustomer(){
   
  let id=Date.now()+Math.random();  
   
- let foodKeys=Object.keys(foods);  
+ let foodKeys=Object.keys(foods).filter(k=>!extraFoods[k]||matamyExtra.unlockedRecipes.includes(k));  
   
  let food=  
   foodKeys[Math.floor(Math.random()*foodKeys.length)];  
@@ -1468,7 +1555,7 @@ function cook(food){
  if(readyOrder){currentFood=food;serveFood();return;}
  let order=orders.find(o=>o.food===food&&!o.cooked&&!o.served&&!o.paid);
  if(!order){message("📋 لا يوجد طلب "+foods[food].name);sound(180,.1);return;}
- const slot=chefJobs.findIndex(job=>job===null);
+ const slot=chefJobs.findIndex((job,index)=>index<matamyExtra.chefCount&&job===null);
  if(slot<0){message("👨‍🍳 الشيفات الستة مشغولون — انتظر قليلًا");sound(180,.1);return;}
  const chefId=slot===0?"chef":"chef"+(slot+1),textId=slot===0?"cookText":"cookText"+(slot+1),progressId=slot===0?"progress":"progress"+(slot+1);
  const chef=document.getElementById(chefId);chef.classList.add("cooking");
@@ -1476,12 +1563,14 @@ function cook(food){
  chef.style.left=positions[food]||"48%";
  const difficulty=Math.max(0,currentStageNumber-1);
  const duration=Math.max(1,Math.ceil(foods[food].time*.72)+Math.floor(difficulty/5)-upgrades.speed-Math.floor(upgrades.kitchen/2));
+ const rank=matamyExtra.chefRanks[slot]||1;
+ const chefDuration=Math.max(1,Math.ceil(duration/(chefSpeed[Math.min(5,rank-1)]||1)));
  let progress=0;document.getElementById(textId).textContent="🔪 تحضير "+foods[food].name;document.getElementById(progressId).style.width="0%";
  currentFood=food;message("👨‍🍳 الشيف "+(slot+1)+" بدأ تحضير "+foods[food].name);sound(500,.1);
  const job={timer:null,order,food,chefId,textId,progressId};chefJobs[slot]=job;cooking=true;updateFoodButtonLights();
  job.timer=setInterval(()=>{
   if(!running||paused)return;
-  progress+=100/(duration*10);document.getElementById(progressId).style.width=Math.min(100,progress)+"%";
+  progress+=100/(chefDuration*10);document.getElementById(progressId).style.width=Math.min(100,progress)+"%";
   if(progress<30)document.getElementById(textId).textContent="🔪 تجهيز المكونات...";
   else if(progress<65)document.getElementById(textId).textContent="🔥 الطبخ على النار...";
   else document.getElementById(textId).textContent="🍽️ تجهيز الطبق...";
@@ -2039,86 +2128,18 @@ function showFinance(){
    المتجر والتطوير  
 ===================================================== */  
   
-function showShop(){  
-  
- openModal(`  
-  
-  <h2>🛒 متجر المطعم والتطوير</h2>  
-  
-  <div class="card">  
-   💰 رصيد الخزنة:  
-   <b>${money}</b> جنيه  
-  </div>  
-  
-  <div class="shoprow">  
-  
-   <span>  
-    ⚡ سرعة الشيف<br>  
-    المستوى ${upgrades.speed}  
-   </span>  
-  
-   <button onclick="buyUpgrade('speed')">  
-    💰 ${100+upgrades.speed*75}  
-   </button>  
-  
-  </div>  
-  
-  
-  <div class="shoprow">  
-  
-   <span>  
-    ⭐ جودة الطعام<br>  
-    المستوى ${upgrades.quality}  
-   </span>  
-  
-   <button onclick="buyUpgrade('quality')">  
-    💰 ${120+upgrades.quality*80}  
-   </button>  
-  
-  </div>  
-  
-  
-  <div class="shoprow">  
-  
-   <span>  
-    💵 الكاشير<br>  
-    المستوى ${upgrades.cashier}  
-   </span>  
-  
-   <button onclick="buyUpgrade('cashier')">  
-    💰 ${150+upgrades.cashier*100}  
-   </button>  
-  
-  </div>  
-  
-  
-  <div class="shoprow">  
-  
-   <span>  
-    🔥 تطوير المطبخ<br>  
-    المستوى ${upgrades.kitchen}  
-   </span>  
-  
-   <button onclick="buyUpgrade('kitchen')">  
-    💰 ${180+upgrades.kitchen*120}  
-   </button>  
-  
-  </div>  
-  
-  
-  <div class="card">  
-   👥 كلما ارتفع المستوى يزيد الحد الأقصى للزبائن.  
-  </div>  
-  
-  <div class="card">  
-   🍽️ أضفنا أطباقًا متنوعة: دجاج، ستيك، بيتزا، مكرونة، سلطة، سوشي، عصائر وحلويات.  
-  </div>  
-  
-  <button onclick="closeModal()">إغلاق</button>  
- `);  
-}  
-  
-  
+function showShop(){
+ let html='<h2>🛒 متجر المطعم والتطوير</h2><div class="card">💰 رصيد الخزنة: <b>'+money+'</b> عملة</div>';
+ html+='<div class="card"><b>👨‍🍳 توظيف الشيفات</b><br>الشيفات الأسرع أغلى، وكل شيف جديد يضيف عاملًا للمطبخ.</div>';
+ for(let n=2;n<=6;n++){const price=chefPrices[n-1],owned=matamyExtra.chefCount>=n;html+='<div class="shoprow"><span>👨‍🍳 الشيف رقم '+n+'<br>سرعة '+Math.round(chefSpeed[n-1]*100)+'%'+(owned?'<br>مملوك':'')+'</span><button '+(owned?'disabled':'')+' onclick="buyChef()">'+(owned?'تم الشراء':'💰 '+price)+'</button></div>';}
+ html+='<div class="shoprow"><span>⚡ سرعة الشيف الأساسية<br>المستوى '+upgrades.speed+'</span><button onclick="buyUpgrade(\'speed\')">💰 '+(100+upgrades.speed*75)+'</button></div>';
+ html+='<div class="shoprow"><span>⭐ جودة الطعام<br>المستوى '+upgrades.quality+'</span><button onclick="buyUpgrade(\'quality\')">💰 '+(120+upgrades.quality*80)+'</button></div>';
+ html+='<div class="shoprow"><span>💵 الكاشير<br>المستوى '+upgrades.cashier+'</span><button onclick="buyUpgrade(\'cashier\')">💰 '+(150+upgrades.cashier*100)+'</button></div>';
+ html+='<div class="shoprow"><span>🔥 تطوير المطبخ<br>المستوى '+upgrades.kitchen+'</span><button onclick="buyUpgrade(\'kitchen\')">💰 '+(180+upgrades.kitchen*120)+'</button></div>';
+ html+='<button onclick="showRecipeShop()">📖 متجر الوصفات والأكلات الجديدة</button><button onclick="closeModal()">إغلاق</button>';
+ openModal(html);
+}
+
 function buyUpgrade(type){  
   
  let price;  
